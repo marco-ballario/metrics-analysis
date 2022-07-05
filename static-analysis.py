@@ -39,7 +39,7 @@ def plot_measures(repositories, sum_list, avg_list, min_list, max_list):
         y = np.array([sum_list[i], min_list[i], max_list[i], avg_list[i]])
         plt.bar(x, y, 0.5, label=repositories[i])
     plt.legend()
-    plt.savefig("graph")
+    plt.savefig("./graphs/static-analysis/abc-static-analysis.png")
     return
 
 
