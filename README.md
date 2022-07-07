@@ -12,6 +12,13 @@ python3 static-analysis.py
 ```
 
 ## Graphs
+- [Weighted Methods per Class (WMC)](#weighted-methods-per-class-wmc)
+- [Magnitude (ABC)](#magnitude-abc)
+- [Number of Public Methods (NPM)](#number-of-public-methods-npm)
+- [Class Operation Accessibility (COA)](#class-operation-accessibility-coa)
+- [Number of Public Attributes (NPA)](#number-of-public-attributes-npa)
+- [Class Data Accessibility (CDA)](#class-data-accessibility-cda)
+- [Size metrics comparison](#size-metrics-comparison)
 
 ### Weighted Methods per Class (WMC)
 Sum, minimum, maximum and average over a set of repository files.
