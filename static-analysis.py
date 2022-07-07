@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 
-def read_measures(repository_name, version, abc, npm, npa, wmc, size):
+def read_measures(repository_name, version, abc, npm, npa, wmc, coa, cda, size):
     magn = []
     pub_met = []
     pub_att = []
@@ -13,16 +13,20 @@ def read_measures(repository_name, version, abc, npm, npa, wmc, size):
     hal_val = []
     loc_val = []
     cyc_val = []
+    coa_val = []
+    cda_val = []
     for filename in glob.iglob("data/" + repository_name + "/" + version + '/**/*.json', recursive=True):
         with open(filename, "r") as file:
             jsonData = json.load(file)
-            magn.append((float(jsonData["metrics"]["abc"]["magnitude"])))
-            pub_met.append((float(jsonData["metrics"]["npm"]["total"])))
-            pub_att.append((float(jsonData["metrics"]["npa"]["total"])))
-            wmc_val.append((float(jsonData["metrics"]["wmc"]["wmc"])))
-            hal_val.append((float(jsonData["metrics"]["halstead"]["estimated_program_length"])))
-            loc_val.append((float(jsonData["metrics"]["loc"]["ploc"])))
-            cyc_val.append((float(jsonData["metrics"]["cyclomatic"]["sum"])))
+            magn.append(float(jsonData["metrics"]["abc"]["magnitude"]))
+            pub_met.append(float(jsonData["metrics"]["npm"]["total"]))
+            pub_att.append(float(jsonData["metrics"]["npa"]["total"]))
+            coa_val.append(float(jsonData["metrics"]["npm"]["average"] or 0))
+            cda_val.append(float(jsonData["metrics"]["npa"]["average"] or 0))
+            wmc_val.append(float(jsonData["metrics"]["wmc"]["wmc"]))
+            hal_val.append(float(jsonData["metrics"]["halstead"]["estimated_program_length"]))
+            loc_val.append(float(jsonData["metrics"]["loc"]["ploc"]))
+            cyc_val.append(float(jsonData["metrics"]["cyclomatic"]["sum"]))
 
             print(os.path.basename(jsonData["name"]))
             print(jsonData["metrics"]["abc"]["magnitude"])
@@ -34,6 +38,8 @@ def read_measures(repository_name, version, abc, npm, npa, wmc, size):
     abc.append( [min(magn), max(magn), sum(magn)/len(magn), sum(magn)] )
     npm.append( [min(pub_met), max(pub_met), sum(pub_met)/len(pub_met), sum(pub_met)] )
     npa.append( [min(pub_att), max(pub_att), sum(pub_att)/len(pub_att), sum(pub_att)] )
+    cda.append( [min(cda_val), max(cda_val), sum(cda_val)/len(cda_val), sum(cda_val)] )
+    coa.append( [min(coa_val), max(coa_val), sum(coa_val)/len(coa_val), sum(coa_val)] )
     wmc.append( [min(wmc_val), max(wmc_val), sum(wmc_val)/len(wmc_val), sum(wmc_val)] )
     size.append( [sum(magn), sum(hal_val), sum(loc_val), sum(cyc_val)] )
     print(abc)
@@ -79,12 +85,16 @@ def static_analysis():
     npm = []
     npa = []
     wmc = []
+    coa = []
+    cda = []
     size = []
     for i in range(len(repos)):
-        read_measures(repos[i], versions[i], abc, npm, npa, wmc, size)
+        read_measures(repos[i], versions[i], abc, npm, npa, wmc, coa, cda, size)
     plot_measures(repos, versions, abc, "ABC", "Magnitude", "abc-static-analysis.png")
     plot_measures(repos, versions, npm, "NPM", "Number of public methods", "npm-static-analysis.png")
     plot_measures(repos, versions, npa, "NPA", "Number of public attributes", "npa-static-analysis.png")
+    plot_measures(repos, versions, coa, "COA", "Class Operation Accessibility", "coa-static-analysis.png")
+    plot_measures(repos, versions, cda, "CDA", "Class Data Accessibility", "cda-static-analysis.png")
     plot_measures(repos, versions, wmc, "WMC", "Weighted methods per class", "wmc-static-analysis.png")
     plot_size_measures(repos, versions, size, "Size measures", "Values", "size-metrics-comparison.png")
     return

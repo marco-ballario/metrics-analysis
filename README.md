@@ -25,9 +25,17 @@ Sum, minimum, maximum and average over a set of repository files.
 Sum, minimum, maximum and average over a set of repository files.
 <div align="center"><img src="./graphs/static-analysis/npm-static-analysis.png" width="100%"></div>
 
+### Class Operation Accessibility (COA)
+Sum, minimum, maximum and average over a set of repository files.
+<div align="center"><img src="./graphs/static-analysis/coa-static-analysis.png" width="100%"></div>
+
 ### Number of Public Attributes (NPA)
 Sum, minimum, maximum and average over a set of repository files.
 <div align="center"><img src="./graphs/static-analysis/npa-static-analysis.png" width="100%"></div>
+
+### Class Data Accessibility (CDA)
+Sum, minimum, maximum and average over a set of repository files.
+<div align="center"><img src="./graphs/static-analysis/cda-static-analysis.png" width="100%"></div>
 
 ### Size metrics comparison
 Compare ABC magnitude, Halstead estimated program length, PLOC and Cyclomatic Complexity metrics for a set of repositories.
