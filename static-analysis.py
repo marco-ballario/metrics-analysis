@@ -5,25 +5,30 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 
-def read_measures(repository_name, version, abc, npm, npa):
+def read_measures(repository_name, version, abc, npm, npa, wmc):
     magn = []
     pub_met = []
     pub_att = []
+    wmc_val = []
     for filename in glob.iglob("data/" + repository_name + "/" + version + '/**/*.json', recursive=True):
         with open(filename, "r") as file:
             jsonData = json.load(file)
             magn.append((float(jsonData["metrics"]["abc"]["magnitude"])))
             pub_met.append((float(jsonData["metrics"]["npm"]["total"])))
             pub_att.append((float(jsonData["metrics"]["npa"]["total"])))
+            wmc_val.append((float(jsonData["metrics"]["wmc"]["wmc"])))
 
             print(os.path.basename(jsonData["name"]))
             print(jsonData["metrics"]["abc"]["magnitude"])
     magn = [float(x) for x in magn]
     pub_met = [float(x) for x in pub_met]
+    pub_att = [float(x) for x in pub_att]
+    wmc_val = [float(x) for x in wmc_val]
     print(magn)
     abc.append( [min(magn), max(magn), sum(magn)/len(magn), sum(magn)] )
     npm.append( [min(pub_met), max(pub_met), sum(pub_met)/len(pub_met), sum(pub_met)] )
     npa.append( [min(pub_att), max(pub_att), sum(pub_att)/len(pub_att), sum(pub_att)] )
+    wmc.append( [min(wmc_val), max(wmc_val), sum(wmc_val)/len(wmc_val), sum(wmc_val)] )
     print(abc)
     return
 
@@ -50,11 +55,13 @@ def static_analysis():
     abc = []
     npm = []
     npa = []
+    wmc = []
     for i in range(len(repos)):
-        read_measures(repos[i], versions[i], abc, npm, npa)
+        read_measures(repos[i], versions[i], abc, npm, npa, wmc)
     plot_measures(repos, versions, abc, "ABC", "Magnitude", "abc-static-analysis.png")
     plot_measures(repos, versions, npm, "NPM", "Number of public methods", "npm-static-analysis.png")
     plot_measures(repos, versions, npa, "NPA", "Number of public attributes", "npa-static-analysis.png")
+    plot_measures(repos, versions, wmc, "WMC", "Weighted methods per class", "wmc-static-analysis.png")
     return
 
 static_analysis()
