@@ -4,7 +4,7 @@
 
 To generate json data files:
 ```
-./produce-data.sh
+python3 data-production.py
 ```
 To generate static analysis graphs:
 ```
