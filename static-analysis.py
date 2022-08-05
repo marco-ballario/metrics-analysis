@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 
-def read_measures(repository_name, version, abc, npm, npa, wmc, coa, cda, size):
+def read_measures(repository_name, version, abc, npm, npa, wmc, coa, cda, size, complexity):
     magn = []
     pub_met = []
     pub_att = []
@@ -42,6 +42,8 @@ def read_measures(repository_name, version, abc, npm, npa, wmc, coa, cda, size):
     coa.append( [min(coa_val), max(coa_val), sum(coa_val)/len(coa_val), sum(coa_val)] )
     wmc.append( [min(wmc_val), max(wmc_val), sum(wmc_val)/len(wmc_val), sum(wmc_val)] )
     size.append( [sum(magn), sum(hal_val), sum(loc_val), sum(cyc_val)] )
+    print( [sum(magn), sum(hal_val), sum(loc_val), sum(cyc_val)] )
+    complexity.append( [sum(wmc_val), sum(cyc_val)] )
     # print(abc)
     return
 
@@ -138,8 +140,8 @@ def plot_size_measures(repositories, versions, val, title, y_name, file):
     V_axis = []
     Y_axis=[]
     for i in range(0, len(repositories)):
-        V_axis.append([repositories[i] + "_sum", repositories[i] + "_min", repositories[i] + "_max", repositories[i] + "_avg"])
-        Y_axis.append([val[i][3], val[i][0], val[i][1], val[i][2]])
+        V_axis.append([repositories[i] + "_cyc", repositories[i] + "_ploc", repositories[i] + "_hal", repositories[i] + "_abc"])
+        Y_axis.append([val[i][3], val[i][2], val[i][1], val[i][0]])
     min_y=float("inf")
     max_y=0
     for y in Y_axis:
@@ -164,6 +166,34 @@ def plot_size_measures(repositories, versions, val, title, y_name, file):
 
     return
 
+def plot_complexity_measures(repositories, versions, val, title, y_name, file):
+    V_axis = []
+    Y_axis=[]
+    for i in range(0, len(repositories)):
+        V_axis.append([repositories[i] + "_cyc", repositories[i] + "_wmc"])
+        Y_axis.append([val[i][1], val[i][0]])
+    min_y=float("inf")
+    max_y=0
+    for y in Y_axis:
+        for value in y:
+            min_y=min(min_y,value)
+            max_y=max(max_y,value)
+    plt.rcParams.update({'font.size': 24})
+    figure(figsize=(42,20), dpi=80)
+    for i in range(0,len(repositories)):
+        bar=plt.barh(V_axis[i], Y_axis[i], 0.66, label = repositories[i])
+        plt.bar_label(bar,padding=5)
+
+    plt.xticks(get_ticks(Y_axis),rotation=45)
+    plt.xlim(min_y)
+    plt.xlabel("Repositories",loc='left',labelpad = 10, fontsize=24)
+    plt.ylabel(y_name,loc='bottom',labelpad = 10, fontsize=24)
+    plt.title(title)
+    plt.legend()
+    plt.savefig("./graphs/static-analysis/" + file)
+    plt.cla()
+    return
+
 def static_analysis():
     repos = ["FastCSV", "java-jwt", "jsoup", "Java-WebSocket"]
     versions = ["v2.2.0", "4.0.0", "jsoup-1.15.2", "v1.5.3"]
@@ -174,8 +204,9 @@ def static_analysis():
     coa = []
     cda = []
     size = []
+    complexity = []
     for i in range(len(repos)):
-        read_measures(repos[i], versions[i], abc, npm, npa, wmc, coa, cda, size)
+        read_measures(repos[i], versions[i], abc, npm, npa, wmc, coa, cda, size, complexity)
     plot_measures(repos, versions, abc, "ABC", "Magnitude", "abc-static-analysis.png")
     plot_measures(repos, versions, npm, "NPM", "Number of public methods", "npm-static-analysis.png")
     plot_measures(repos, versions, npa, "NPA", "Number of public attributes", "npa-static-analysis.png")
@@ -183,6 +214,7 @@ def static_analysis():
     plot_measures(repos, versions, cda, "CDA", "Class Data Accessibility", "cda-static-analysis.png")
     plot_measures(repos, versions, wmc, "WMC", "Weighted methods per class", "wmc-static-analysis.png")
     plot_size_measures(repos, versions, size, "Size measures", "Values", "size-metrics-comparison.png")
+    plot_complexity_measures(repos, versions, complexity, "Complexity measures", "Values", "complexity-metrics-comparison.png")
     return
 
 def get_ticks(Y_axis):

@@ -8,6 +8,7 @@
 - [Number of Public Attributes (NPA)](#number-of-public-attributes-npa)
 - [Class Data Accessibility (CDA)](#class-data-accessibility-cda)
 - [Size metrics comparison](#size-metrics-comparison)
+- [Complexity metrics comparison](#complexity-metrics-comparison)
 
 ### Weighted Methods per Class (WMC)
 Sum, minimum, maximum and average over a set of repository files.
@@ -36,3 +37,7 @@ Sum, minimum, maximum and average over a set of repository files.
 ### Size metrics comparison
 Compare ABC magnitude, Halstead estimated program length, PLOC and Cyclomatic Complexity metrics for a set of repositories.
 <div align="center"><img src="./size-metrics-comparison.png" width="100%"></div>
+
+### Complexity metrics comparison
+Compare WMC and Cyclomatic Complexity metrics for a set of repositories.
+<div align="center"><img src="./complexity-metrics-comparison.png" width="100%"></div>
