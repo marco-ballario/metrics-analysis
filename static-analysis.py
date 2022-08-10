@@ -35,12 +35,12 @@ def read_measures(repository_name, version, abc, npm, npa, wmc, coa, cda, size, 
     pub_att = [float(x) for x in pub_att]
     wmc_val = [float(x) for x in wmc_val]
     # print(magn)
-    abc.append( [min(magn), max(magn), sum(magn)/len(magn), sum(magn)] )
-    npm.append( [min(pub_met), max(pub_met), sum(pub_met)/len(pub_met), sum(pub_met)] )
-    npa.append( [min(pub_att), max(pub_att), sum(pub_att)/len(pub_att), sum(pub_att)] )
-    cda.append( [min(cda_val), max(cda_val), sum(cda_val)/len(cda_val), sum(cda_val)] )
-    coa.append( [min(coa_val), max(coa_val), sum(coa_val)/len(coa_val), sum(coa_val)] )
-    wmc.append( [min(wmc_val), max(wmc_val), sum(wmc_val)/len(wmc_val), sum(wmc_val)] )
+    abc.append( [max(magn), sum(magn)/len(magn), sum(magn)] )
+    npm.append( [max(pub_met), sum(pub_met)/len(pub_met), sum(pub_met)] )
+    npa.append( [max(pub_att), sum(pub_att)/len(pub_att), sum(pub_att)] )
+    cda.append( [max(cda_val), sum(cda_val)/len(cda_val), sum(cda_val)] )
+    coa.append( [max(coa_val), sum(coa_val)/len(coa_val), sum(coa_val)] )
+    wmc.append( [max(wmc_val), sum(wmc_val)/len(wmc_val), sum(wmc_val)] )
     size.append( [sum(magn), sum(hal_val), sum(loc_val), sum(cyc_val)] )
     print( [sum(magn), sum(hal_val), sum(loc_val), sum(cyc_val)] )
     complexity.append( [sum(wmc_val), sum(cyc_val)] )
@@ -52,8 +52,8 @@ def plot_measures(repositories, versions, abc, title, y_name, file):
     V_axis = []
     Y_axis=[]
     for i in range(0, len(repositories)):
-        V_axis.append([repositories[i] + "_sum", repositories[i] + "_min", repositories[i] + "_max", repositories[i] + "_avg"])
-        Y_axis.append([abc[i][3], abc[i][0], abc[i][1], abc[i][2]])
+        V_axis.append([repositories[i] + "_sum", repositories[i] + "_max", repositories[i] + "_avg"])
+        Y_axis.append([abc[i][2], abc[i][0], abc[i][1]])
     min_y=float("inf")
     max_y=0
     for y in Y_axis:
@@ -64,12 +64,12 @@ def plot_measures(repositories, versions, abc, title, y_name, file):
     figure(figsize=(42,22), dpi=80)
     for i in range(0,len(repositories)):
         bar=plt.barh(V_axis[i], Y_axis[i], 0.66, label = repositories[i])
-        plt.bar_label(bar,padding=5)
+        plt.bar_label(bar,padding=5, fontweight='bold')
 
     plt.xticks(get_ticks(Y_axis),rotation=45)
     plt.xlim(min_y)
-    plt.xlabel("Repositories",loc='left',labelpad = 10, fontsize=24)
-    plt.ylabel(y_name,loc='bottom',labelpad = 10, fontsize=24)
+    plt.xlabel("Repositories",loc='left',labelpad = 10, fontweight='bold', fontsize=24)
+    plt.ylabel(y_name,loc='bottom',labelpad = 10, fontweight='bold', fontsize=24)
     plt.title(title)
     plt.legend()
     plt.savefig("./graphs/static-analysis/" + file)
@@ -152,12 +152,12 @@ def plot_size_measures(repositories, versions, val, title, y_name, file):
     figure(figsize=(42,22), dpi=80)
     for i in range(0,len(repositories)):
         bar=plt.barh(V_axis[i], Y_axis[i], 0.66, label = repositories[i])
-        plt.bar_label(bar,padding=5)
+        plt.bar_label(bar,padding=5, fontweight='bold')
 
     plt.xticks(get_ticks(Y_axis),rotation=45)
     plt.xlim(min_y)
-    plt.xlabel("Repositories",loc='left',labelpad = 10, fontsize=24)
-    plt.ylabel(y_name,loc='bottom',labelpad = 10, fontsize=24)
+    plt.xlabel("Repositories",loc='left',labelpad = 10, fontweight='bold', fontsize=24)
+    plt.ylabel(y_name,loc='bottom',labelpad = 10, fontweight='bold', fontsize=24)
     plt.title(title)
     plt.legend()
     plt.savefig("./graphs/static-analysis/" + file)
@@ -182,12 +182,12 @@ def plot_complexity_measures(repositories, versions, val, title, y_name, file):
     figure(figsize=(42,20), dpi=80)
     for i in range(0,len(repositories)):
         bar=plt.barh(V_axis[i], Y_axis[i], 0.66, label = repositories[i])
-        plt.bar_label(bar,padding=5)
+        plt.bar_label(bar,padding=5, fontweight='bold')
 
     plt.xticks(get_ticks(Y_axis),rotation=45)
     plt.xlim(min_y)
-    plt.xlabel("Repositories",loc='left',labelpad = 10, fontsize=24)
-    plt.ylabel(y_name,loc='bottom',labelpad = 10, fontsize=24)
+    plt.xlabel("Repositories",loc='left',labelpad = 10, fontweight='bold', fontsize=24)
+    plt.ylabel(y_name,loc='bottom',labelpad = 10, fontweight='bold', fontsize=24)
     plt.title(title)
     plt.legend()
     plt.savefig("./graphs/static-analysis/" + file)
