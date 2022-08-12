@@ -48,8 +48,8 @@ def plot_cumulative_measures(repositories, values, legend_loc, title, file):
         x.append([values[i][2], values[i][1], values[i][0]])
         y.append([repositories[i] + "_avg", repositories[i] + "_max", repositories[i] + "_sum"])
 
-    font_size = 24
-    figure(figsize=(42, 22), dpi=80)
+    font_size = 28
+    figure(figsize=(50, 26), dpi=80)
     plt.rcParams.update({"font.size": font_size})
 
     for i in range(0,len(repositories)):
@@ -72,9 +72,9 @@ def plot_size_measures(repositories, val, title, file):
         x.append([val[i][3], val[i][2], val[i][1], val[i][0]])
         y.append([repositories[i] + "_cyc", repositories[i] + "_ploc", repositories[i] + "_hal", repositories[i] + "_abc"])
 
-    font_size = 24
+    font_size = 28
     plt.rcParams.update({"font.size": font_size})
-    figure(figsize=(42, 22), dpi=80)
+    figure(figsize=(50, 26), dpi=80)
 
     for i in range(0,len(repositories)):
         bar = plt.barh(y[i], x[i], 0.66, label=repositories[i])
@@ -96,9 +96,9 @@ def plot_complexity_measures(repositories, val, title, file):
         y.append([repositories[i] + "_cyc", repositories[i] + "_wmc"])
         x.append([val[i][1], val[i][0]])
 
-    font_size = 24
+    font_size = 28
     plt.rcParams.update({"font.size": font_size})
-    figure(figsize=(42, 22), dpi=80)
+    figure(figsize=(50, 26), dpi=80)
 
     for i in range(0,len(repositories)):
         bar = plt.barh(y[i], x[i], 0.66, label=repositories[i])
@@ -123,10 +123,10 @@ def plot_visibility_measures(repositories, values, title, file):
         x2.append([values[i][0]])
         y.append([repositories[i]])
 
-    font_size = 24
+    font_size = 28
     name = title.split()[-1]
     plt.rcParams.update({"font.size": font_size})
-    figure(figsize=(42, 22), dpi=80)
+    figure(figsize=(50, 26), dpi=80)
 
     for i in range(0, len(repositories)):
         bar1 = plt.barh(y[i], x1[i], 0.4, color="#1f77b4", label = "Non-Public " + name)
@@ -157,10 +157,10 @@ def plot_visibility_percentages(repositories, values, title, file):
         x2.append([values[i][0] / values[i][1] * 100])
         y.append([repositories[i]])
 
-    font_size = 24
+    font_size = 28
     name = title.split()[-1]
     plt.rcParams.update({"font.size": font_size})
-    figure(figsize=(42, 22), dpi=80)
+    figure(figsize=(50, 26), dpi=80)
 
     for i in range(0, len(repositories)):
         bar1 = plt.barh(y[i], x1[i], 0.4, color="#1f77b4", label = "Non-Public " + name)
@@ -183,8 +183,8 @@ def plot_visibility_percentages(repositories, values, title, file):
     return
 
 def static_analysis():
-    repos = ["FastCSV", "java-jwt", "jsoup", "Java-WebSocket"]
-    versions = ["v2.2.0", "4.0.0", "jsoup-1.15.2", "v1.5.3"]
+    repos = ["FastCSV", "java-jwt", "jsoup", "Java-WebSocket", "spring-kafka"]
+    versions = ["v2.2.0", "4.0.0", "jsoup-1.15.2", "v1.5.3", "v2.9.0"]
 
     abc = []
     npm = []

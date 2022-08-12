@@ -3,6 +3,7 @@
 ## Repositories
 | Name | Version | Files | Source |
 | --- | --- | --- | --- |
+| [spring-kafka](https://github.com/spring-projects/spring-kafka) | v2.9.0 | 502 | [Maven Central](https://mvnrepository.com/artifact/org.springframework.kafka/spring-kafka) |
 | [Java-WebSocket](https://github.com/TooTallNate/Java-WebSocket) | v1.5.3 | 175 | [Maven Central](https://mvnrepository.com/artifact/org.java-websocket/Java-WebSocket) |
 | [jsoup](https://github.com/jhy/jsoup) | jsoup-1.15.2 | 136 | [Maven Central](https://mvnrepository.com/artifact/org.jsoup/jsoup) |
 | [java-jwt](https://github.com/auth0/java-jwt) | 4.0.0 | 75 | [Maven Central](https://mvnrepository.com/artifact/com.auth0/java-jwt) |
