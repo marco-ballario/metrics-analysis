@@ -5,7 +5,7 @@ REPO_DIR = Path("./repositories")
 
 RCA_DIR = REPO_DIR / "rust-code-analysis"
 RCA_CLI = "rust-code-analysis-cli"
-RCA_URL = "https://github.com/mozilla/rust-code-analysis.git"
+RCA_URL = "https://github.com/SoftengPoliTo/rust-code-analysis.git"
 
 REPO_NAMES = [
     "FastCSV",
@@ -34,7 +34,7 @@ def run_cmd(args, cwd):
 def setup_rca():
     if RCA_DIR.is_dir():
         print("Updating rust-code-analysis...")
-        run_cmd(["git", "checkout", "-f", "master"], RCA_DIR)
+        run_cmd(["git", "checkout", "-f", "wmc-sum"], RCA_DIR)
         run_cmd(["git", "pull"], RCA_DIR)
         run_cmd(["cargo", "build", "-p", RCA_CLI, "--release"], RCA_DIR)
         print("rust-code-analysis updated!")
@@ -43,6 +43,7 @@ def setup_rca():
         if not REPO_DIR.exists():
             REPO_DIR.mkdir(parents=True, exist_ok=True)
         run_cmd(["git", "clone", RCA_URL], REPO_DIR)
+        run_cmd(["git", "checkout", "-f", "wmc-sum"], RCA_DIR)
         run_cmd(["cargo", "build", "-p", RCA_CLI, "--release"], RCA_DIR)
         print("rust-code-analysis ready!")
 
