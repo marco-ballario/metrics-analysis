@@ -12,21 +12,27 @@ REPO_NAMES = [
     "java-jwt",
     "jsoup",
     "Java-WebSocket",
-    "spring-kafka"
+    "gson",
+    "spring-kafka",
+    "mockito"
 ]
 REPO_URLS = [
     "https://github.com/osiegmar/FastCSV.git",
     "https://github.com/auth0/java-jwt.git",
     "https://github.com/jhy/jsoup.git",
     "https://github.com/TooTallNate/Java-WebSocket.git",
-    "https://github.com/spring-projects/spring-kafka.git"
+    "https://github.com/google/gson.git",
+    "https://github.com/spring-projects/spring-kafka.git",
+    "https://github.com/mockito/mockito.git"
 ]
 REPO_VERS = [
     ["v1.0.4", "v2.0.0", "v2.1.0", "v2.2.0"],
-    ["3.17.0", "3.18.0", "3.18.1", "3.18.2", "3.18.3", "3.19.0", "3.19.1", "3.19.2", "4.0.0-beta.0", "4.0.0"],
+    ["3.16.0", "3.17.0", "3.18.0", "3.18.1", "3.18.2", "3.18.3", "3.19.0", "3.19.1", "3.19.2", "4.0.0"],
     ["jsoup-1.12.2", "jsoup-1.13.1", "jsoup-1.14.1", "jsoup-1.14.2", "jsoup-1.14.3", "jsoup-1.15.1", "jsoup-1.15.2"],
     ["v1.3.1", "v1.3.3", "v1.3.8", "v1.3.9", "v1.4.0", "v1.4.1", "v1.5.0", "v1.5.1", "v1.5.2", "v1.5.3"],
-    ["v2.9.0"]
+    ["gson-parent-2.8.2", "gson-parent-2.8.3", "gson-parent-2.8.4", "gson-parent-2.8.5", "gson-parent-2.8.6", "gson-parent-2.8.7", "gson-parent-2.8.8", "gson-parent-2.8.9", "gson-parent-2.9.0", "gson-parent-2.9.1"],
+    ["v2.8.0", "v2.8.1", "v2.8.2", "v2.8.3", "v2.8.4", "v2.8.5", "v2.8.6", "v2.8.7", "v2.8.8", "v2.9.0"],
+    ["v4.1.0", "v4.2.0", "v4.3.0", "v4.3.1", "v4.4.0", "v4.5.0", "v4.5.1", "v4.6.0", "v4.6.1", "v4.7.0"]
 ]
 
 DATA_DIR = Path("./data")
@@ -57,7 +63,10 @@ def setup_repos():
 
         if repo_dir.is_dir():
             print("Updating " + repo_name + "...")
-            run_cmd(["git", "checkout", "-f", "master"], repo_dir)
+            if index != 5 and index != 6:
+                run_cmd(["git", "checkout", "-f", "master"], repo_dir)
+            else:
+                run_cmd(["git", "checkout", "-f", "main"], repo_dir)
             run_cmd(["git", "pull"], repo_dir)
             print(repo_name + " updated!")
         else:
