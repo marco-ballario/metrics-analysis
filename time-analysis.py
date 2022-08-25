@@ -11,29 +11,80 @@ import re
 THRESHOLD_ABC = 60
 THRESHOLD_WMC = 34
 THRESHOLD_NPM = 40
-THRESHOLD_NPA = 0
+THRESHOLD_NPA = 10
 THRESHOLD_COA = 1.0
 THRESHOLD_CDA = 1.0
 
 def get_classes(json_data, classes, classes_npm, classes_npa, classes_coa, classes_cda, classes_wmc):
+    
+    class_wmc = 0
     class_npm = 0
     class_npa = 0
+    class_nm = 0
+    class_na = 0
     class_coa = 0
     class_cda = 0
+
+    
+
     for space in json_data["spaces"]:
         if space["kind"] == "class" or space["kind"] == "interface":
             classes.append(space["name"])
-            class_npm += float(space["metrics"]["npm"]["total"])
-            class_npa += float(space["metrics"]["npa"]["total"])
-            class_coa += float(space["metrics"]["npm"]["average"] or 0)
-            class_cda += float(space["metrics"]["npa"]["average"] or 0)
-            get_classes(space, classes, classes_npm, classes_npa, classes_coa, classes_cda, classes_wmc)
+
+            res = [0,0,0,0,0,0,0]
+            print("guardo dentro " + space["name"])
+            for s in space["spaces"]:
+                count_inner_spaces_measures(s, res)
+            class_wmc = res[0]
+            class_npm = res[1]
+            class_npa = res[2]
+            class_coa = res[3]
+            class_cda = res[4]
+            class_nm = res[5]
+            class_na = res[6]
+            print(str(space["metrics"]["wmc"]["wmc"]) + " = " + str(space["metrics"]["wmc"]["total"]) + " - " + str(class_wmc))
+            assert float(space["metrics"]["wmc"]["wmc"]) == float(space["metrics"]["wmc"]["total"]) - float(class_wmc)
+
+
+
+
+        get_classes(space, classes, classes_npm, classes_npa, classes_coa, classes_cda, classes_wmc)
+
+
+
     if json_data["kind"] == "class" or json_data["kind"] == "interface":
         classes_npm.append(float(json_data["metrics"]["npm"]["total"]) - class_npm)
         classes_npa.append(float(json_data["metrics"]["npa"]["total"]) - class_npa)
-        classes_coa.append(float(json_data["metrics"]["npm"]["average"] or 0) - class_coa)
-        classes_cda.append(float(json_data["metrics"]["npa"]["average"] or 0) - class_cda)
+        a = float(json_data["metrics"]["npm"]["total"]) - class_npm
+        b = float(json_data["metrics"]["npa"]["total"]) - class_npa
+        c = float(json_data["metrics"]["npm"]["total_methods"]) - class_nm
+        d = float(json_data["metrics"]["npa"]["total_attributes"]) - class_na
+        if c == 0:
+            classes_coa.append(float(0)) #classes_npm[-1]/total methods class
+        else:
+            classes_coa.append(float(a/c)) #classes_npm[-1]/total methods class
+        if d == 0:
+            classes_cda.append(float(0))
+        else:
+            classes_cda.append(float(b/d))
         classes_wmc.append(float(json_data["metrics"]["wmc"]["wmc"]))
+
+
+    return
+
+def count_inner_spaces_measures(root, res):
+    if root["kind"] == "class" or root["kind"] == "interface":
+        print("hey " + root["name"])
+        res[0] += float(root["metrics"]["wmc"]["total"])
+        res[1] += float(root["metrics"]["npm"]["total"])
+        res[2] += float(root["metrics"]["npa"]["total"])
+        res[3] += float(root["metrics"]["npm"]["average"] or 0)
+        res[4] += float(root["metrics"]["npa"]["average"] or 0)
+        res[5] += float(root["metrics"]["npm"]["total_methods"])
+        res[6] += float(root["metrics"]["npa"]["total_attributes"])
+        return
+    for space in root["spaces"]:
+        count_inner_spaces_measures(space, res)
     return
 
 def read_measures(repository_name, version, max_data, avg_data, files, abc, wmc, npm, npa, coa, cda, classesx):
@@ -155,10 +206,10 @@ def print_plot(versions,vec,img_path):
         cda.append(rows[9])
     for i, v in enumerate(versions):
         versions[i] = re.sub("[a-zA-Z-]", "", versions[i])
-    plt.rcParams.update({'font.size': 16})
+    plt.rcParams.update({'font.size': 24}) #16
 
     figure, axis = plt.subplots(2, 2)
-    figure.set_size_inches(30, 20)
+    figure.set_size_inches(32, 20) #30 - 20
 
     axis[0, 0].plot(versions, abc)
     axis[0, 0].scatter(versions, abc, color="r")
@@ -181,14 +232,15 @@ def print_plot(versions,vec,img_path):
     axis[1, 1].set_xlabel('versions')
 
     plt.subplots_adjust(wspace=0.2, hspace=0.3)
-    plt.savefig(img_path + "-1.png")
+    plt.tight_layout()
+    plt.savefig(img_path + "-1.svg")
     plt.cla()
     plt.close(figure)
 
-    plt.rcParams.update({'font.size': 12})
+    plt.rcParams.update({'font.size': 20}) # 12
 
     figure, axis = plt.subplots(3, 2)
-    figure.set_size_inches(24, 26)
+    figure.set_size_inches(26, 26) # 24 -26
 
     axis[0, 0].plot(versions, npm)
     axis[0, 0].scatter(versions, npm, color="r")
@@ -221,12 +273,13 @@ def print_plot(versions,vec,img_path):
     axis[2, 1].set_xlabel('versions')
 
     plt.subplots_adjust(wspace=0.2, hspace=0.3)
-    plt.savefig(img_path + "-2.png")
+    plt.tight_layout()
+    plt.savefig(img_path + "-2.svg")
     plt.cla()
     plt.close(figure)
     return
 
-def plot_threshold_measures(versions, files, values, title, file, label1, label2, label3, threshold):
+def plot_threshold_measures(versions, files, values, title, file, label1, label2, label3, threshold, opt=False):
     y = []
     x1 = []
     x2 = []
@@ -237,20 +290,32 @@ def plot_threshold_measures(versions, files, values, title, file, label1, label2
         x2.append(values[i])
         y.append(str(versions[i]))
 
-    font_size = 28
+    font_size = 28 #28
     plt.rcParams.update({"font.size": font_size})
-    fig = figure(figsize=(50, 26), dpi=80)
+    fig = figure(figsize=(40, 16), dpi=80) # 50 - 26
 
     for i in range(0, len(versions)):
         bar1 = plt.bar(y[i], x1[i], 0.5, color="#1f77b4", label = label1 + " With " + label3 + str(threshold))
         bar2 = plt.bar(y[i], x2[i], 0.5, color="#d62728", label = label1 + " With " + label2 + str(threshold))
         plt.text(i, (x1[i] - x2[i]) // 2 + x2[i], str(x1[i] - x2[i]), color="snow", va="center", ha="center", fontweight="bold")
         plt.bar_label(bar1, padding=5, fontweight="bold")
-        plt.bar_label(bar2, label_type="center", color="snow", fontweight="bold")
+        #plt.bar_label(bar2, label_type="center", color="snow", fontweight="bold")
+        if x2[i] != 0:
+            #values[i] / files[i] * 100
+            if x2[i] / x1[i] * 100 >= 5:
+                plt.bar_label(bar2, label_type="center", color="snow", fontweight="bold")
+            if x2[i] / x1[i] * 100 < 5:
+                plt.bar_label(bar2, label_type="edge", color="snow", padding=5, fontweight="bold")
+
 
     #plt.margins(y=0.2)
     #plt.xticks(rotation=45)
     yt=plt.yticks()[0].tolist()
+    if opt:   
+        print(yt[-1] - yt[-2])
+        yt.append(float(yt[-1] + (yt[-1] - yt[-2])))
+        
+    print(plt.yticks()[0].tolist()) 
     plt.yticks(yt)
     plt.xlabel("Versions", loc="left", labelpad = 10, fontweight="bold", fontsize=font_size)
     plt.ylabel("Number Of " + label1, loc="bottom", labelpad = 10, fontweight="bold", fontsize=font_size)
@@ -258,6 +323,7 @@ def plot_threshold_measures(versions, files, values, title, file, label1, label2
     handles, labels = plt.gca().get_legend_handles_labels()
     order = [1, 0]
     plt.legend([handles[i] for i in order], [labels[i] for i in order], loc="upper left", prop={"size": font_size})
+    plt.tight_layout()
     plt.savefig("./graphs/time-analysis/thresholds/" + file)
     plt.cla()
     plt.close(fig)
@@ -274,16 +340,23 @@ def plot_threshold_percentages(versions, files, values, title, file, label1, lab
         x2.append(values[i] / files[i] * 100)
         y.append(str(versions[i]))
 
-    font_size = 28
+    font_size = 28 #28
     plt.rcParams.update({"font.size": font_size})
-    fig = figure(figsize=(50, 26), dpi=80)
+    fig = figure(figsize=(40, 16), dpi=80) # 50 - 26 => 40 - 16 => 44 - 24
 
     for i in range(0, len(versions)):
         bar1 = plt.bar(y[i], x1[i], 0.5, color="#1f77b4", label = "Percentage Of " + label1 + " With " + label3 + str(threshold))
         bar2 = plt.bar(y[i], x2[i], 0.5, color="#d62728", label = "Percentage Of " + label1 + " With " + label2 + str(threshold))
-        plt.text(i, (100 - x2[i]) // 2 + x2[i], "{:.2f}".format(100 - x2[i]) + "%", color="snow", va="center", ha="center", fontweight="bold")
-        plt.bar_label(bar1, padding=5, fontweight="bold", fmt="%.0f%%")
-        plt.bar_label(bar2, label_type="center", color="snow", fontweight="bold", fmt="%.2f%%")
+        if x2[i] == 0:
+            plt.text(i, (100 - x2[i]) // 2 + x2[i], str(int(100.0)) + "%", color="snow", va="center", ha="center", fontweight="bold")
+        else:
+            plt.text(i, (100 - x2[i]) // 2 + x2[i], "{:.2f}".format(100 - x2[i]) + "%", color="snow", va="center", ha="center", fontweight="bold")
+        #plt.bar_label(bar1, padding=5, fontweight="bold", fmt="%.0f%%")
+        if x2[i] != 0:
+            if x2[i] >= 5:
+                plt.bar_label(bar2, label_type="center", color="snow", fontweight="bold", fmt="%.2f%%")
+            if x2[i] < 5:
+                plt.bar_label(bar2, label_type="edge", color="snow", padding=5, fontweight="bold", fmt="%.2f%%")
 
     #plt.margins(y=0.2)
     #plt.xticks(rotation=45)
@@ -295,17 +368,19 @@ def plot_threshold_percentages(versions, files, values, title, file, label1, lab
     handles, labels = plt.gca().get_legend_handles_labels()
     order = [1, 0]
     plt.legend([handles[i] for i in order], [labels[i] for i in order], loc="upper right", prop={"size": font_size})
+    plt.tight_layout()
     plt.savefig("./graphs/time-analysis/thresholds/" + file)
     plt.cla()
     plt.close(fig)
     return
 
 def time_analysis():
-    repos = ["java-jwt", "gson", "spring-kafka"]
+    repos = ["java-jwt", "gson", "spring-kafka", "mockito"]
     versions = [
         ["3.16.0", "3.17.0", "3.18.0", "3.18.1", "3.18.2", "3.18.3", "3.19.0", "3.19.1", "3.19.2", "4.0.0"],
         ["gson-parent-2.8.2", "gson-parent-2.8.3", "gson-parent-2.8.4", "gson-parent-2.8.5", "gson-parent-2.8.6", "gson-parent-2.8.7", "gson-parent-2.8.8", "gson-parent-2.8.9", "gson-parent-2.9.0", "gson-parent-2.9.1"],
-        ["v2.8.0", "v2.8.1", "v2.8.2", "v2.8.3", "v2.8.4", "v2.8.5", "v2.8.6", "v2.8.7", "v2.8.8", "v2.9.0"]
+        ["v2.8.0", "v2.8.1", "v2.8.2", "v2.8.3", "v2.8.4", "v2.8.5", "v2.8.6", "v2.8.7", "v2.8.8", "v2.9.0"],
+        ["v4.1.0", "v4.2.0", "v4.3.0", "v4.3.1", "v4.4.0", "v4.5.0", "v4.5.1", "v4.6.0", "v4.6.1", "v4.7.0"]
     ]
 
     for index, repo in enumerate(repos):
@@ -323,18 +398,19 @@ def time_analysis():
         for version in versions[index]:
             read_measures(repo, version, max, avg, files, abc, wmc, npm, npa, coa, cda, classes)
             print(repo + " " + version + " data collected!")
-        plot_threshold_percentages(versions[index], files, abc, "ABC magnitude files (Threshold = ?) - " + repo, "threshold-percentages-abc-" + repo + ".png", "Files", "Magnitude >= ", "Magnitude < ", THRESHOLD_ABC)
-        plot_threshold_measures(versions[index], files, abc, "ABC magnitude files (Threshold = ?) - " + repo, "threshold-measures-abc-" + repo + ".png", "Files", "Magnitude >= ", "Magnitude < ", THRESHOLD_ABC)
-        plot_threshold_percentages(versions[index], classes, wmc, "WMC classes (Threshold = ?) - " + repo, "threshold-percentages-wmc-" + repo + ".png", "Classes", "WMC >= ", "WMC < ", THRESHOLD_WMC)
-        plot_threshold_measures(versions[index], classes, wmc, "WMC classes (Threshold = ?) - " + repo, "threshold-measures-wmc-" + repo + ".png", "Classes", "WMC >= ", "WMC < ", THRESHOLD_WMC)
-        plot_threshold_percentages(versions[index], classes, npm, "NPM classes (Threshold = ?) - " + repo, "threshold-percentages-npm-" + repo + ".png", "Classes", "NPM >= ", "NPM < ", THRESHOLD_NPM)
-        plot_threshold_measures(versions[index], classes, npm, "NPM classes (Threshold = ?) - " + repo, "threshold-measures-npm-" + repo + ".png", "Classes", "NPM >= ", "NPM < ", THRESHOLD_NPM)
-        plot_threshold_percentages(versions[index], classes, npa, "NPA classes (Threshold = ?) - " + repo, "threshold-percentages-npa-" + repo + ".png", "Classes", "NPA >= ", "NPA < ", THRESHOLD_NPA)
-        plot_threshold_measures(versions[index], classes, npa, "NPA classes (Threshold = ?) - " + repo, "threshold-measures-npa-" + repo + ".png", "Classes", "NPA >= ", "NPA < ", THRESHOLD_NPA)
-        plot_threshold_percentages(versions[index], classes, coa, "COA classes (Threshold = ?) - " + repo, "threshold-percentages-coa-" + repo + ".png", "Classes", "COA >= ", "COA < ", THRESHOLD_COA)
-        plot_threshold_measures(versions[index], classes, coa, "COA classes (Threshold = ?) - " + repo, "threshold-measures-coa-" + repo + ".png", "Classes", "COA >= ", "COA < ", THRESHOLD_COA)
-        plot_threshold_percentages(versions[index], classes, cda, "CDA classes (Threshold = ?) - " + repo, "threshold-percentages-cda-" + repo + ".png", "Classes", "CDA == ", "CDA < ", THRESHOLD_CDA)
-        plot_threshold_measures(versions[index], classes, cda, "CDA classes (Threshold = ?) - " + repo, "threshold-measures-cda-" + repo + ".png", "Classes", "CDA == ", "CDA < ", THRESHOLD_CDA)
+        opt = index == 3
+        plot_threshold_percentages(versions[index], files, abc, "ABC magnitude files (Threshold = ?) - " + repo, "threshold-percentages-abc-" + repo + ".svg", "Files", "Magnitude >= ", "Magnitude < ", THRESHOLD_ABC)
+        plot_threshold_measures(versions[index], files, abc, "ABC magnitude files (Threshold = ?) - " + repo, "threshold-measures-abc-" + repo + ".svg", "Files", "Magnitude >= ", "Magnitude < ", THRESHOLD_ABC, opt)
+        plot_threshold_percentages(versions[index], classes, wmc, "WMC classes (Threshold = ?) - " + repo, "threshold-percentages-wmc-" + repo + ".svg", "Classes", "WMC >= ", "WMC < ", THRESHOLD_WMC)
+        plot_threshold_measures(versions[index], classes, wmc, "WMC classes (Threshold = ?) - " + repo, "threshold-measures-wmc-" + repo + ".svg", "Classes", "WMC >= ", "WMC < ", THRESHOLD_WMC, opt)
+        plot_threshold_percentages(versions[index], classes, npm, "NPM classes (Threshold = ?) - " + repo, "threshold-percentages-npm-" + repo + ".svg", "Classes", "NPM >= ", "NPM < ", THRESHOLD_NPM)
+        plot_threshold_measures(versions[index], classes, npm, "NPM classes (Threshold = ?) - " + repo, "threshold-measures-npm-" + repo + ".svg", "Classes", "NPM >= ", "NPM < ", THRESHOLD_NPM, opt)
+        plot_threshold_percentages(versions[index], classes, npa, "NPA classes (Threshold = ?) - " + repo, "threshold-percentages-npa-" + repo + ".svg", "Classes", "NPA >= ", "NPA < ", THRESHOLD_NPA)
+        plot_threshold_measures(versions[index], classes, npa, "NPA classes (Threshold = ?) - " + repo, "threshold-measures-npa-" + repo + ".svg", "Classes", "NPA >= ", "NPA < ", THRESHOLD_NPA, opt)
+        plot_threshold_percentages(versions[index], classes, coa, "COA classes (Threshold = ?) - " + repo, "threshold-percentages-coa-" + repo + ".svg", "Classes", "COA = ", "COA < ", THRESHOLD_COA)
+        plot_threshold_measures(versions[index], classes, coa, "COA classes (Threshold = ?) - " + repo, "threshold-measures-coa-" + repo + ".svg", "Classes", "COA = ", "COA < ", THRESHOLD_COA, opt)
+        plot_threshold_percentages(versions[index], classes, cda, "CDA classes (Threshold = ?) - " + repo, "threshold-percentages-cda-" + repo + ".svg", "Classes", "CDA = ", "CDA < ", THRESHOLD_CDA)
+        plot_threshold_measures(versions[index], classes, cda, "CDA classes (Threshold = ?) - " + repo, "threshold-measures-cda-" + repo + ".svg", "Classes", "CDA = ", "CDA < ", THRESHOLD_CDA, opt)
         print_plot(versions[index], avg,"./graphs/time-analysis/cumulative/average-measures-" + repo)
         print_plot(versions[index], max,"./graphs/time-analysis/cumulative/maximum-measures-" + repo)
         print(repo + " graphs generated!")
