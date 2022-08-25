@@ -1,74 +1,118 @@
 # Static Analysis
 
 ## Repositories
-| Name | Version | Files | Source |
-| --- | --- | --- | --- |
-| [spring-kafka](https://github.com/spring-projects/spring-kafka) | v2.9.0 | 502 | [Maven Central](https://mvnrepository.com/artifact/org.springframework.kafka/spring-kafka) |
-| [Java-WebSocket](https://github.com/TooTallNate/Java-WebSocket) | v1.5.3 | 175 | [Maven Central](https://mvnrepository.com/artifact/org.java-websocket/Java-WebSocket) |
-| [jsoup](https://github.com/jhy/jsoup) | jsoup-1.15.2 | 136 | [Maven Central](https://mvnrepository.com/artifact/org.jsoup/jsoup) |
-| [java-jwt](https://github.com/auth0/java-jwt) | 4.0.0 | 75 | [Maven Central](https://mvnrepository.com/artifact/com.auth0/java-jwt) |
-| [FastCSV](https://github.com/osiegmar/FastCSV) | v2.2.0 | 39 | [Maven Central](https://mvnrepository.com/artifact/de.siegmar/fastcsv) |
+| Name | Size | Version | Java Files | Source |
+| --- | --- | --- | --- | --- |
+| [mockito](https://github.com/mockito/mockito) | Very Large | 4.7.0 | 949 | [Maven Central](https://mvnrepository.com/artifact/org.mockito/mockito-core) |
+| [spring-kafka](https://github.com/spring-projects/spring-kafka) | Large | 2.9.0 | 502 | [Maven Central](https://mvnrepository.com/artifact/org.springframework.kafka/spring-kafka) |
+| [Java-WebSocket](https://github.com/TooTallNate/Java-WebSocket) | Medium | 1.5.3 | 175 | [Maven Central](https://mvnrepository.com/artifact/org.java-websocket/Java-WebSocket) |
+| [FastCSV](https://github.com/osiegmar/FastCSV) | Small |2.2.0 | 39 | [Maven Central](https://mvnrepository.com/artifact/de.siegmar/fastcsv) |
 
 ## Graphs
 - [Cumulative measures](#cumulative-measures)
-    - [Magnitude (ABC)](#magnitude-abc)
-    - [Weighted Methods per Class (WMC)](#weighted-methods-per-class-wmc)
-    - [Number of Public Methods (NPM)](#number-of-public-methods-npm)
-    - [Number of Public Attributes (NPA)](#number-of-public-attributes-npa)
+  - [Size and Complexity](#size-and-complexity)
+  - [Visibility](#visibility)
 - [Metric comparisons](#metric-comparisons)
-    - [Size metrics](#size-metrics)
-    - [Complexity metrics](#complexity-metrics)
+  - [Size](#size)
+  - [Complexity](#complexity)
 - [Visibility measures](#visibility-measures)
-    - [Methods](#methods)
-    - [Percentage of methods](#percentages-of-methods)
-    - [Attributes](#attributes)
-    - [Percentage of attributes](#percentage-of-attributes)
+  - [Measures](#measures)
+  - [Percentages](#percentages)
 
 ### Cumulative measures
 This kind of graph represents the sum, maximum and average cumulative measures for each repository.
 
-#### Magnitude (ABC)
-The objective of the graph is to show that the magnitude can be used to measure repositories size. The magnitude is often directly proportional to the number of source files in the repository.
-<div align="center"><img src="./cumulative-measures-abc.png" width="100%"></div>
+#### Size and Complexity
 
-#### Weighted Methods per Class (WMC)
-The objective of the graph is to show that the WMC can be used to measure repositories complexity.
-<div align="center"><img src="./cumulative-measures-wmc.png" width="100%"></div>
+<table width="100%">
+  <tr>
+    <td width="50%">Magnitude (ABC)</td>
+    <td width="50%">Weighted Methods per Class (WMC)</td>
+  </tr>
+  <tr>
+    <td width="50%">The objective of the graph is to show that the magnitude can be used to measure repositories size. The magnitude is often directly proportional to the number of source files in the repository.</td>
+    <td width="50%">The objective of the graph is to show that the WMC can be used to measure repositories complexity.</td>
+  </tr>
+  <tr>
+    <td width="50%">
+        <img src="./cumulative-measures-abc.svg" width="100%">
+    </td>
+    <td width="50%">
+        <img src="./cumulative-measures-wmc.svg" width="100%">
+    </td>
+  </tr>
+</table>
 
-#### Number of Public Methods (NPM)
-The objective of the graph is to show that the NPM can be used to measure repositories security.
-<div align="center"><img src="./cumulative-measures-npm.png" width="100%"></div>
+#### Visibility
 
-#### Number of Public Attributes (NPA)
-The objective of the graph is to show that the NPA can be used to measure repositories security.
-<div align="center"><img src="./cumulative-measures-npa.png" width="100%"></div>
+<table>
+  <tr>
+    <td width="50%">Number of Public Methods (NPM)</td>
+    <td width="50%">Number of Public Attributes (NPA)</td>
+  </tr>
+  <tr>
+    <td width="50%">The objective of the graph is to show that the NPM can be used to measure repositories security.</td>
+    <td width="50%">The objective of the graph is to show that the NPA can be used to measure repositories security.</td>
+  </tr>
+  <tr>
+    <td width="50%">
+        <img src="./cumulative-measures-npm.svg" width="100%">
+    </td>
+    <td width="50%">
+        <img src="./cumulative-measures-npa.svg" width="100%">
+    </td>
+  </tr>
+</table>
 
 ### Metric comparisons
 This kind of graph represent more than one metric for each repository.
 
-#### Size metrics
+#### Size
 The objective of the graph is to show that ABC magnitude, Halstead Estimated Program Length, PLOC and Cyclomatic Complexity metrics for a set of repositories provide similar repository size information.
-<div align="center"><img src="./metric-comparisons-size.png" width="100%"></div>
+<div align="center"><img src="./metric-comparisons-size.svg" width="100%"></div>
 
-#### Complexity metrics
+#### Complexity
 The objective of the graph is to show that WMC and Cyclomatic Complexity metrics for a set of repositories provide similar repository complexity information.
-<div align="center"><img src="./metric-comparisons-complexity.png" width="100%"></div>
+<div align="center"><img src="./metric-comparisons-complexity.svg" width="100%"></div>
 
 ### Visibility measures
-This kind of graph represent public and non-public members for each repository.
+This kind of graph represent public and non-public methods and attributes for each repository.
 
-#### Methods
-The objective of the graph is to show how many public and non-public methods have been declared in repositories.
-<div align="center"><img src="./visibility-measures-npm.png" width="100%"></div>
+#### Measures
 
-#### Percentages of methods
-The objective of the graph is to show the percentages of public and non-public methods declared in repositories.
-<div align="center"><img src="./visibility-percentages-npm.png" width="100%"></div>
+The objective of the graph is to show how many public and non-public methods and attributes have been declared in the repositories.
 
-#### Attributes
-The objective of the graph is to show how many public and non-public attributes have been declared in repositories.
-<div align="center"><img src="./visibility-measures-npa.png" width="100%"></div>
+<table width="100%">
+  <tr>
+    <td width="50%">Number of Methods</td>
+    <td width="50%">Number of Attributes</td>
+  </tr>
+  <tr>
+    <td width="50%">
+        <img src="./visibility-measures-npm.svg" width="100%">
+    </td>
+    <td width="50%">
+        <img src="./visibility-measures-npa.svg" width="100%">
+    </td>
+  </tr>
+</table>
 
-#### Percentage of attributes
-The objective of the graph is to show the percentages of public and non-public attributes declared in repositories.
-<div align="center"><img src="./visibility-percentages-npa.png" width="100%"></div>
+
+#### Percentages
+
+The objective of the graph is to show the percentages of public and non-public methods and attributes declared in the repositories. 
+
+<table width="100%">
+  <tr>
+    <td width="50%">Percentages of Methods</td>
+    <td width="50%">Percentages of Attributes</td>
+  </tr>
+  <tr>
+    <td width="50%">
+        <img src="./visibility-percentages-npm.svg" width="100%">
+    </td>
+    <td width="50%">
+        <img src="./visibility-percentages-npa.svg" width="100%">
+    </td>
+  </tr>
+</table>
