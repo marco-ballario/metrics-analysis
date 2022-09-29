@@ -7,6 +7,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 import re
+import csv
+
+TOP_FILES_NUMBER = 3
+TOP_CLASSES_NUMBER = 3
 
 THRESHOLD_ABC = 60
 THRESHOLD_WMC = 34
@@ -15,171 +19,193 @@ THRESHOLD_NPA = 10
 THRESHOLD_COA = 1.0
 THRESHOLD_CDA = 1.0
 
-def get_classes(json_data, classes, classes_npm, classes_npa, classes_coa, classes_cda, classes_wmc):
+# get the class data
+def get_classes(json_data, class_names, class_npm, class_npa, class_coa, class_cda, class_wmc, file_name):
     
-    class_wmc = 0
-    class_npm = 0
-    class_npa = 0
-    class_nm = 0
-    class_na = 0
-    class_coa = 0
-    class_cda = 0
-
-    
-
+    # for each inner space of the provided space
     for space in json_data["spaces"]:
         if space["kind"] == "class" or space["kind"] == "interface":
-            classes.append(space["name"])
 
-            res = [0,0,0,0,0,0,0]
-            print("guardo dentro " + space["name"])
+            # initialize array and save class name
+            res = [0, 0, 0, 0, 0, 0, 0]
+            class_names.append(str(os.path.join(file_name, space["name"])))
+            
+            # debug
+            print("look inside " + space["name"] + " " + str(space["metrics"]["wmc"]["total"]))
+
+            # compute sums of measures of internal classes
             for s in space["spaces"]:
                 count_inner_spaces_measures(s, res)
-            class_wmc = res[0]
-            class_npm = res[1]
-            class_npa = res[2]
-            class_coa = res[3]
-            class_cda = res[4]
-            class_nm = res[5]
-            class_na = res[6]
-            print(str(space["metrics"]["wmc"]["wmc"]) + " = " + str(space["metrics"]["wmc"]["total"]) + " - " + str(class_wmc))
-            assert float(space["metrics"]["wmc"]["wmc"]) == float(space["metrics"]["wmc"]["total"]) - float(class_wmc)
 
+            # debug
+            print("   collected " + str(res[0]))
+            print("   measure = " + str(space["metrics"]["wmc"]["total"]) + " - " + str(res[0]))
+            
+            # compute actual class measure
+            # class measure = (class measure + sum of measures of internal classes) - sum of measures of internal classes 
+            wmc_val = float(space["metrics"]["wmc"]["total"]) - res[0]
+            npm_val = float(space["metrics"]["npm"]["total"]) - res[1]
+            npa_val = float(space["metrics"]["npa"]["total"]) - res[2]
+            nm_val = float(space["metrics"]["npm"]["total_methods"]) - res[3]
+            na_val = float(space["metrics"]["npa"]["total_attributes"]) - res[4]
+            coa_val = float(0 if nm_val == 0 else npm_val/nm_val)
+            cda_val = float(0 if na_val == 0 else npa_val/na_val)
 
-
-
-        get_classes(space, classes, classes_npm, classes_npa, classes_coa, classes_cda, classes_wmc)
-
-
-
-    if json_data["kind"] == "class" or json_data["kind"] == "interface":
-        classes_npm.append(float(json_data["metrics"]["npm"]["total"]) - class_npm)
-        classes_npa.append(float(json_data["metrics"]["npa"]["total"]) - class_npa)
-        a = float(json_data["metrics"]["npm"]["total"]) - class_npm
-        b = float(json_data["metrics"]["npa"]["total"]) - class_npa
-        c = float(json_data["metrics"]["npm"]["total_methods"]) - class_nm
-        d = float(json_data["metrics"]["npa"]["total_attributes"]) - class_na
-        if c == 0:
-            classes_coa.append(float(0)) #classes_npm[-1]/total methods class
-        else:
-            classes_coa.append(float(a/c)) #classes_npm[-1]/total methods class
-        if d == 0:
-            classes_cda.append(float(0))
-        else:
-            classes_cda.append(float(b/d))
-        classes_wmc.append(float(json_data["metrics"]["wmc"]["wmc"]))
-
+            # store class measures
+            class_wmc.append(wmc_val)
+            class_npm.append(npm_val)
+            class_npa.append(npa_val)
+            class_coa.append(coa_val)
+            class_cda.append(cda_val)
+            
+        # inspect inner spaces of the current space
+        get_classes(space, class_names, class_npm, class_npa, class_coa, class_cda, class_wmc, file_name)
 
     return
 
+# compute sums of measures of internal classes
 def count_inner_spaces_measures(root, res):
+
+    # inspect spaces of type class or interface
     if root["kind"] == "class" or root["kind"] == "interface":
-        print("hey " + root["name"])
+
+        # debug
+        print("   |_ " + root["name"] + " " + str(root["metrics"]["wmc"]["total"]))
+
+        # accumulate sums
         res[0] += float(root["metrics"]["wmc"]["total"])
         res[1] += float(root["metrics"]["npm"]["total"])
         res[2] += float(root["metrics"]["npa"]["total"])
-        res[3] += float(root["metrics"]["npm"]["average"] or 0)
-        res[4] += float(root["metrics"]["npa"]["average"] or 0)
-        res[5] += float(root["metrics"]["npm"]["total_methods"])
-        res[6] += float(root["metrics"]["npa"]["total_attributes"])
+        res[3] += float(root["metrics"]["npm"]["total_methods"])
+        res[4] += float(root["metrics"]["npa"]["total_attributes"])
         return
+
+    # inspect inner spaces of the current space
     for space in root["spaces"]:
         count_inner_spaces_measures(space, res)
     return
 
-def read_measures(repository_name, version, max_data, avg_data, files, abc, wmc, npm, npa, coa, cda, classesx):
-    magn = []
-    pub_met = []
-    pub_att = []
-    wmc_val = []
-    hal_val = []
-    loc_val = []
-    cyc_val = []
-    coa_val = []
-    cda_val = []
-    nm_val = []
-    na_val = []
-    classes = []
-    file_names = []
-    big_files_names = []
-    big_wmc_files_names = []
-    big_npm_files_names = []
-    big_npa_files_names = []
-    big_coa_files_names = []
-    big_cda_files_names = []
-    npmx = []
-    npax = []
-    coax = []
-    cdax = []
-    wmcx = []
+def read_measures(repository_name, version, csv_writers, max_data, avg_data, files, abc, wmc, npm, npa, coa, cda, classes):
 
+    abc_mag = []
+    loc_ploc = []
+    wmc_tot = []
+    cyc_sum = []
+    npm_tot = []
+    npa_tot = []
+    npn_tot_met = []
+    npa_tot_att = []
+    npm_avg = []
+    npa_avg = []
+
+    file_names = []
+    class_names = []
+    class_npm = []
+    class_npa = []
+    class_coa = []
+    class_cda = []
+    class_wmc = []
+
+    file_abc_dict = dict()
+    class_wmc_dict = dict()
+    class_npm_dict = dict()
+    class_npa_dict = dict()
+
+    high_abc_files = []
+    high_wmc_values = []
+    high_npm_values = []
+    high_npa_values = []
+    high_coa_values = []
+    high_cda_values = []
+
+    # debug
+    # npm is not debugged since some source files have enum classes not recognised by RCA
+    old_class_wmc = 0
+    old_class_npa = 0
+
+    # for each measures file
     for filename in glob.iglob("data/" + repository_name + "/" + version + '/**/*.java.json', recursive=True):
         with open(filename, "r") as file:
-            jsonData = json.load(file)
-            print(jsonData["name"])
-            magn.append(float(jsonData["metrics"]["abc"]["magnitude"]))
-            pub_met.append(float(jsonData["metrics"]["npm"]["total"]))
-            pub_att.append(float(jsonData["metrics"]["npa"]["total"]))
-            nm_val.append(float(jsonData["metrics"]["npm"]["total_methods"]))
-            na_val.append(float(jsonData["metrics"]["npa"]["total_attributes"]))
-            coa_val.append(float(jsonData["metrics"]["npm"]["average"] or 0))
-            cda_val.append(float(jsonData["metrics"]["npa"]["average"] or 0))
-            wmc_val.append(float(jsonData["metrics"]["wmc"]["total"]))
-            hal_val.append(float(jsonData["metrics"]["halstead"]["estimated_program_length"]))
-            loc_val.append(float(jsonData["metrics"]["loc"]["ploc"]))
-            cyc_val.append(float(jsonData["metrics"]["cyclomatic"]["sum"]))
-            get_classes(jsonData, classes, npmx, npax, coax, cdax, wmcx)
-            file_names.append(jsonData["name"])
-            #print(len(classes))
-            #print(sum(pub_met))
-            #print(sum(npmx))
-            #print(len(npmx))
             
-            if float(jsonData["metrics"]["abc"]["magnitude"]) > THRESHOLD_ABC:
-                big_files_names.append(jsonData["name"])
-            #if float(jsonData["metrics"]["wmc"]["total"]) > 34:
-                #big_wmc_files_names.append(jsonData["name"])
+            json_data = json.load(file)
+            file_names.append(json_data["name"])
+            abc_mag.append(float(json_data["metrics"]["abc"]["magnitude"]))
+            wmc_tot.append(float(json_data["metrics"]["wmc"]["total"]))
+            npm_tot.append(float(json_data["metrics"]["npm"]["total"]))
+            npa_tot.append(float(json_data["metrics"]["npa"]["total"]))
+            npm_avg.append(float(json_data["metrics"]["npm"]["average"] or 0))
+            npa_avg.append(float(json_data["metrics"]["npa"]["average"] or 0))
+            npn_tot_met.append(float(json_data["metrics"]["npm"]["total_methods"]))
+            npa_tot_att.append(float(json_data["metrics"]["npa"]["total_attributes"]))
+            loc_ploc.append(float(json_data["metrics"]["loc"]["ploc"]))
+            cyc_sum.append(float(json_data["metrics"]["cyclomatic"]["sum"]))
+
+            # get class data
+            get_classes(json_data, class_names, class_npm, class_npa, class_coa, class_cda, class_wmc, json_data["name"])
+
+            # debug
+            assert len(class_names) == len(class_npm) == len(class_npa) == len(class_coa) == len(class_cda) == len(class_wmc)
+            assert sum(class_wmc) - old_class_wmc == float(json_data["metrics"]["wmc"]["total"])
+            assert sum(class_npa) - old_class_npa == float(json_data["metrics"]["npa"]["total"])
+            old_class_wmc = sum(class_wmc)
+            old_class_npa = sum(class_npa)
             
-            #if float(jsonData["metrics"]["npa"]["total"]) > 10:
-                #big_npa_files_names.append(jsonData["name"])
-            #if float(jsonData["metrics"]["npm"]["average"] or 0) >= 1.0:
-                #big_coa_files_names.append(jsonData["name"])
-            #if float(jsonData["metrics"]["npa"]["average"] or 0) >= 1.0:
-                #big_cda_files_names.append(jsonData["name"])
-            
-    #print(len(classes))
-    #print(sum(pub_met))
-    #print(sum(npmx))
-    #print(len(npmx))
+            # threshold abc
+            file_abc_dict[json_data["name"]] = float(json_data["metrics"]["abc"]["magnitude"])
+            if float(json_data["metrics"]["abc"]["magnitude"]) > THRESHOLD_ABC:
+                high_abc_files.append(json_data["name"])
     
-    magn = [float(x) for x in magn]
-    pub_met = [float(x) for x in pub_met]
-    pub_att = [float(x) for x in pub_att]
-    wmc_val = [float(x) for x in wmc_val]
+    # debug
+    assert len(file_names) == len(file_abc_dict)
+    assert len(class_names) >= len(file_abc_dict)
+    assert len(abc_mag) == len(wmc_tot) == len(loc_ploc) == len(cyc_sum)
+    assert len(npm_tot) == len(npa_tot) == len(npm_avg) == len(npa_avg) == len(npn_tot_met) == len(npa_tot_att)
+    assert sum(npn_tot_met) >= sum(npm_tot)
+    assert sum(npa_tot_att) >= sum(npa_tot)
+
+    # top abc files
+    file_abc_sorted = sorted(file_abc_dict.items(), key=lambda x: x[1], reverse=True)[:TOP_FILES_NUMBER]
+    for t in file_abc_sorted:
+        csv_writers[0].writerow([repository_name, version, t[0], os.path.basename(t[0]), round(t[1], 2)])
     
-    #print(npax)
-    for i, v in enumerate(classes):
-        if npmx[i] > THRESHOLD_NPM:
-            big_npm_files_names.append(npmx[i])
-        if npax[i] > THRESHOLD_NPA:
-            big_npa_files_names.append(npax[i])
-        if coax[i] == THRESHOLD_COA:
-            big_coa_files_names.append(coax[i])
-        if cdax[i] == THRESHOLD_CDA:
-            big_cda_files_names.append(cdax[i])
-        if wmcx[i] > THRESHOLD_WMC:
-            big_wmc_files_names.append(wmcx[i])
+    # thresholds wmc, npm and npa
+    for i, v in enumerate(class_names):
+        class_wmc_dict[v] = class_wmc[i]
+        class_npm_dict[v] = class_npm[i]
+        class_npa_dict[v] = class_npa[i]
+
+        if class_npm[i] > THRESHOLD_NPM:
+            high_npm_values.append(class_npm[i])
+        if class_npa[i] > THRESHOLD_NPA:
+            high_npa_values.append(class_npa[i])
+        if class_coa[i] == THRESHOLD_COA:
+            high_coa_values.append(class_coa[i])
+        if class_cda[i] == THRESHOLD_CDA:
+            high_cda_values.append(class_cda[i])
+        if class_wmc[i] > THRESHOLD_WMC:
+            high_wmc_values.append(class_wmc[i])
+
+    # top wmc, npm and npa classes
+    class_wmc_sorted = sorted(class_wmc_dict.items(), key=lambda x: x[1], reverse=True)[:TOP_CLASSES_NUMBER]
+    class_npm_sorted = sorted(class_npm_dict.items(), key=lambda x: x[1], reverse=True)[:TOP_CLASSES_NUMBER]
+    class_npa_sorted = sorted(class_npa_dict.items(), key=lambda x: x[1], reverse=True)[:TOP_CLASSES_NUMBER]
+    assert len(file_abc_sorted) == len(class_wmc_sorted) == len(class_npm_sorted) == len(class_npa_sorted) == TOP_CLASSES_NUMBER
+    for i in range(TOP_CLASSES_NUMBER):
+        csv_writers[1].writerow([repository_name, version, os.path.dirname(class_wmc_sorted[i][0]), os.path.basename(class_wmc_sorted[i][0]), int(class_wmc_sorted[i][1])])
+        csv_writers[2].writerow([repository_name, version, os.path.dirname(class_npm_sorted[i][0]), os.path.basename(class_npm_sorted[i][0]), int(class_npm_sorted[i][1])])
+        csv_writers[3].writerow([repository_name, version, os.path.dirname(class_npa_sorted[i][0]), os.path.basename(class_npa_sorted[i][0]), int(class_npa_sorted[i][1])])
 
     files.append(len(file_names))
-    classesx.append(len(classes))
-    abc.append(len(big_files_names))
-    wmc.append(len(big_wmc_files_names))
-    npm.append(len(big_npm_files_names))
-    npa.append(len(big_npa_files_names))
-    coa.append(len(big_coa_files_names))
-    cda.append(len(big_cda_files_names))
-    max_data.append( [max(magn), max(loc_val), max(wmc_val), max(cyc_val), max(pub_met), max(pub_att), max(nm_val), max(na_val), max(coa_val), max(cda_val)] )
-    avg_data.append( [sum(magn)/len(magn), sum(loc_val)/len(loc_val), sum(wmc_val)/len(wmc_val), sum(cyc_val)/len(cyc_val), sum(pub_met)/len(pub_met), sum(pub_att)/len(pub_att), sum(nm_val)/len(nm_val), sum(na_val)/len(na_val), sum(coa_val)/len(coa_val), sum(cda_val)/len(cda_val)] )
+    classes.append(len(class_names))
+    abc.append(len(high_abc_files))
+    wmc.append(len(high_wmc_values))
+    npm.append(len(high_npm_values))
+    npa.append(len(high_npa_values))
+    coa.append(len(high_coa_values))
+    cda.append(len(high_cda_values))
+
+    max_data.append( [max(abc_mag), max(loc_ploc), max(wmc_tot), max(cyc_sum), max(npm_tot), max(npa_tot), max(npn_tot_met), max(npa_tot_att), max(npm_avg), max(npa_avg)] )
+    avg_data.append( [sum(abc_mag)/len(abc_mag), sum(loc_ploc)/len(loc_ploc), sum(wmc_tot)/len(wmc_tot), sum(cyc_sum)/len(cyc_sum), sum(npm_tot)/len(npm_tot), sum(npa_tot)/len(npa_tot), sum(npn_tot_met)/len(npn_tot_met), sum(npa_tot_att)/len(npa_tot_att), sum(npm_avg)/len(npm_avg), sum(npa_avg)/len(npa_avg)] )
     return
 
 def print_plot(versions,vec,img_path):
@@ -312,10 +338,10 @@ def plot_threshold_measures(versions, files, values, title, file, label1, label2
     #plt.xticks(rotation=45)
     yt=plt.yticks()[0].tolist()
     if opt:   
-        print(yt[-1] - yt[-2])
+        ###print(yt[-1] - yt[-2])
         yt.append(float(yt[-1] + (yt[-1] - yt[-2])))
         
-    print(plt.yticks()[0].tolist()) 
+    ###print(plt.yticks()[0].tolist()) 
     plt.yticks(yt)
     plt.xlabel("Versions", loc="left", labelpad = 10, fontweight="bold", fontsize=font_size)
     plt.ylabel("Number Of " + label1, loc="bottom", labelpad = 10, fontweight="bold", fontsize=font_size)
@@ -382,6 +408,14 @@ def time_analysis():
         ["v2.8.0", "v2.8.1", "v2.8.2", "v2.8.3", "v2.8.4", "v2.8.5", "v2.8.6", "v2.8.7", "v2.8.8", "v2.9.0"],
         ["v4.1.0", "v4.2.0", "v4.3.0", "v4.3.1", "v4.4.0", "v4.5.0", "v4.5.1", "v4.6.0", "v4.6.1", "v4.7.0"]
     ]
+    header = ["repository", "version", "path", "name", "value"]
+    top_metrics = ["abc", "wmc", "npm", "npa"]
+    csv_files = []
+    csv_writers = []
+    for i, v in enumerate(top_metrics):
+        f = open("./graphs/time-analysis/rankings/top_" + v + "_" + ("files" if i == 0 else "classes") + ".csv", "w")
+        csv_files.append(f)
+        csv_writers.append(csv.writer(f))
 
     for index, repo in enumerate(repos):
         avg = []
@@ -394,9 +428,10 @@ def time_analysis():
         cda = []
         files = []
         classes = []
+
         print("Generating " + repo + " graphs...")
         for version in versions[index]:
-            read_measures(repo, version, max, avg, files, abc, wmc, npm, npa, coa, cda, classes)
+            read_measures(repo, version, csv_writers, max, avg, files, abc, wmc, npm, npa, coa, cda, classes)
             print(repo + " " + version + " data collected!")
         opt = index == 3
         plot_threshold_percentages(versions[index], files, abc, "ABC magnitude files (Threshold = ?) - " + repo, "threshold-percentages-abc-" + repo + ".svg", "Files", "Magnitude >= ", "Magnitude < ", THRESHOLD_ABC)
@@ -414,5 +449,8 @@ def time_analysis():
         print_plot(versions[index], avg,"./graphs/time-analysis/cumulative/average-measures-" + repo)
         print_plot(versions[index], max,"./graphs/time-analysis/cumulative/maximum-measures-" + repo)
         print(repo + " graphs generated!")
+        
+    for i, v in enumerate(top_metrics):
+        csv_files[i].close()
 
 time_analysis()
