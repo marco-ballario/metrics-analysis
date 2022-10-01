@@ -1,5 +1,9 @@
 # metrics-analysis
 
+## Analyses
+- [Spatial](./spatial-analysis)
+- [Temporal](./temporal-analysis)
+
 ## Usage
 
 To generate json data files:
@@ -14,7 +18,3 @@ To generate time analysis graphs:
 ```
 python3 time-analysis.py
 ```
-
-## Graphs
-- [Static analysis](./graphs/static-analysis)
-- [Time analysis](./graphs/time-analysis)

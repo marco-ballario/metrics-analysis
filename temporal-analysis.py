@@ -398,7 +398,7 @@ def plot_threshold_measures(versions, files, values, title, file, label1, label2
     order = [1, 0]
     plt.legend([handles[i] for i in order], [labels[i] for i in order], loc="upper left", prop={"size": font_size})
     plt.tight_layout()
-    plt.savefig("./graphs/time-analysis/thresholds/" + file)
+    plt.savefig("./temporal-analysis/thresholds/" + file)
     plt.cla()
     plt.close(fig)
     return
@@ -443,12 +443,12 @@ def plot_threshold_percentages(versions, files, values, title, file, label1, lab
     order = [1, 0]
     plt.legend([handles[i] for i in order], [labels[i] for i in order], loc="upper right", prop={"size": font_size})
     plt.tight_layout()
-    plt.savefig("./graphs/time-analysis/thresholds/" + file)
+    plt.savefig("./temporal-analysis/thresholds/" + file)
     plt.cla()
     plt.close(fig)
     return
 
-def time_analysis():
+def temporal_analysis():
     repos = ["java-jwt", "gson", "spring-kafka", "mockito"]
     versions = [
         ["3.16.0", "3.17.0", "3.18.0", "3.18.1", "3.18.2", "3.18.3", "3.19.0", "3.19.1", "3.19.2", "4.0.0"],
@@ -461,7 +461,7 @@ def time_analysis():
     csv_files = []
     csv_writers = []
     for i, v in enumerate(top_metrics):
-        f = open("./graphs/time-analysis/rankings/top_" + v + "_" + ("files" if i == 0 else "classes") + ".csv", "w")
+        f = open("./temporal-analysis/rankings/top_" + v + "_" + ("files" if i == 0 else "classes") + ".csv", "w")
         csv_files.append(f)
         csv_writers.append(csv.writer(f))
 
@@ -477,7 +477,7 @@ def time_analysis():
         files = []
         classes = []
 
-        print("Generating " + repo + " graphs...")
+        print("Generating " + repo + " graphs and tables...")
         for version in versions[index]:
             read_measures(repo, version, csv_writers, max, avg, files, abc, wmc, npm, npa, coa, cda, classes)
             print(repo + " " + version + " data collected!")
@@ -494,11 +494,11 @@ def time_analysis():
         plot_threshold_measures(versions[index], classes, coa, "COA classes (Threshold = ?) - " + repo, "threshold-measures-coa-" + repo + ".svg", "Classes", "COA = ", "COA < ", THRESHOLD_COA, opt)
         plot_threshold_percentages(versions[index], classes, cda, "CDA classes (Threshold = ?) - " + repo, "threshold-percentages-cda-" + repo + ".svg", "Classes", "CDA = ", "CDA < ", THRESHOLD_CDA)
         plot_threshold_measures(versions[index], classes, cda, "CDA classes (Threshold = ?) - " + repo, "threshold-measures-cda-" + repo + ".svg", "Classes", "CDA = ", "CDA < ", THRESHOLD_CDA, opt)
-        print_plot(versions[index], avg,"./graphs/time-analysis/cumulative/average-measures-" + repo)
-        print_plot(versions[index], max,"./graphs/time-analysis/cumulative/maximum-measures-" + repo)
-        print(repo + " graphs generated!")
+        print_plot(versions[index], avg,"./temporal-analysis/cumulative/average-measures-" + repo)
+        print_plot(versions[index], max,"./temporal-analysis/cumulative/maximum-measures-" + repo)
+        print(repo + " graphs and tables generated!")
         
     for i, v in enumerate(top_metrics):
         csv_files[i].close()
 
-time_analysis()
+temporal_analysis()

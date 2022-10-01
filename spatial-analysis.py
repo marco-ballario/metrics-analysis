@@ -69,7 +69,7 @@ def plot_cumulative_measures(repositories, values, legend_loc, title, file):
 
     #plt.xticks(rotation=45)
     plt.tight_layout(h_pad=2)
-    plt.savefig("./graphs/static-analysis/" + file)
+    plt.savefig("./spatial-analysis/" + file)
     plt.cla()
     return
 
@@ -95,7 +95,7 @@ def plot_size_measures(repositories, val, title, file):
     plt.title(title)
     plt.legend(loc="lower right",)
     plt.tight_layout()
-    plt.savefig("./graphs/static-analysis/" + file)
+    plt.savefig("./spatial-analysis/" + file)
     plt.cla()
     return
 
@@ -123,7 +123,7 @@ def plot_complexity_measures(repositories, val, title, file):
     ax.set_ylim([-1, 8])
     plt.legend()
     plt.tight_layout()
-    plt.savefig("./graphs/static-analysis/" + file)
+    plt.savefig("./spatial-analysis/" + file)
     plt.cla()
     return
 
@@ -159,7 +159,7 @@ def plot_visibility_measures(repositories, values, title, file):
     order = [1, 0]
     plt.legend([handles[i] for i in order], [labels[i] for i in order], loc="upper left", prop={"size": font_size})
     plt.tight_layout()
-    plt.savefig("./graphs/static-analysis/" + file)
+    plt.savefig("./spatial-analysis/" + file)
     plt.cla()
     return
 
@@ -201,11 +201,11 @@ def plot_visibility_percentages(repositories, values, title, file):
     order = [1, 0]
     plt.legend([handles[i] for i in order], [labels[i] for i in order], loc="upper right", prop={"size": font_size})
     plt.tight_layout()
-    plt.savefig("./graphs/static-analysis/" + file)
+    plt.savefig("./spatial-analysis/" + file)
     plt.cla()
     return
 
-def static_analysis():
+def spatial_analysis():
     repos = ["FastCSV", "Java-WebSocket", "spring-kafka", "mockito"]
     versions = ["v2.2.0", "v1.5.3", "v2.9.0", "v4.7.0"]
 
@@ -233,4 +233,4 @@ def static_analysis():
     plot_size_measures(repos, size, "Size measures", "metric-comparisons-size.svg")
     return
 
-static_analysis()
+spatial_analysis()

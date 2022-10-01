@@ -1,4 +1,4 @@
-# Static Analysis
+# spatial-analysis
 
 ## Repositories
 | Name | Size | Version | Java Files | Source |
