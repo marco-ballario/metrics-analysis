@@ -1,13 +1,13 @@
 from importlib.util import spec_from_file_location
-import os
-import json
-import glob
 from importlib_metadata import version
-import numpy as np
-import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
-import re
+import matplotlib.pyplot as plt
+import numpy as np
+import glob
+import json
 import csv
+import re
+import os
 
 TOP_FILES_NUMBER = 3
 TOP_CLASSES_NUMBER = 3
@@ -84,6 +84,51 @@ def count_inner_spaces_measures(root, res):
     for space in root["spaces"]:
         count_inner_spaces_measures(space, res)
     return
+
+# test class metrics computation
+def test_classes(repository_name, version, class_npa_dict, class_npm_dict, class_wmc_dict):
+
+    NPA_JAVA_JWT_CLASS = str(os.path.join("../java-jwt/lib/src/test/java/com/auth0/jwt/JWTVerifierTest.java", "JWTVerifierTest"))
+    NPM_JAVA_JWT_CLASS = str(os.path.join("../java-jwt/lib/src/main/java/com/auth0/jwt/TokenUtils.java", "TokenUtils"))
+    WMC_JAVA_JWT_CLASS = str(os.path.join("../java-jwt/lib/src/main/java/com/auth0/jwt/JWTVerifier.java", "JWTVerifier"))
+    NPA_GSON_CLASS = str(os.path.join("../gson/gson/src/test/java/com/google/gson/GsonTest.java", "GsonTest"))
+    NPM_GSON_CLASS = str(os.path.join("../gson/gson/src/test/java/com/google/gson/CommentsTest.java", "CommentsTest"))
+    WMC_GSON_CLASS = str(os.path.join("../gson/gson/src/main/java/com/google/gson/JsonNull.java", "JsonNull"))
+    NPA_SPRING_KAFKA_CLASS = str(os.path.join("../spring-kafka/spring-kafka-test/src/main/java/org/springframework/kafka/test/core/BrokerAddress.java", "BrokerAddress"))
+    NPM_SPRING_KAFKA_CLASS = str(os.path.join("../spring-kafka/spring-kafka-test/src/test/java/org/springframework/kafka/test/utils/KafkaTestUtilsTests.java", "KafkaTestUtilsTests"))
+    WMC_SPRING_KAFKA_CLASS = str(os.path.join("../spring-kafka/spring-kafka/src/test/java/org/springframework/kafka/core/KafkaAdminTests.java", "KafkaAdminTests"))
+    NPA_MOCKITO_CLASS = str(os.path.join("../mockito/src/test/java/org/mockitoutil/ClassLoadersTest.java", "ClassLoadersTest"))
+    NPM_MOCKITO_CLASS = str(os.path.join("../mockito/src/main/java/org/mockito/Mockito.java", "Mockito"))
+    WMC_MOCKITO_CLASS = str(os.path.join("../mockito/src/test/java/org/mockitoutil/TestBase.java", "TestBase"))
+
+    if repository_name == "java-jwt":
+        if version == "3.16.0":
+            assert class_npa_dict[NPA_JAVA_JWT_CLASS] == 1
+        if version == "3.17.0":
+            assert class_npm_dict[NPM_JAVA_JWT_CLASS] == 0
+        if version == "3.18.0":
+            assert class_wmc_dict[WMC_JAVA_JWT_CLASS] == 57
+    if repository_name == "gson":
+        if version == "gson-parent-2.8.2":
+            assert class_npa_dict[NPA_GSON_CLASS] == 0
+        if version == "gson-parent-2.8.3":
+            assert class_npm_dict[NPM_GSON_CLASS] == 1
+        if version == "gson-parent-2.8.4":
+            assert class_wmc_dict[WMC_GSON_CLASS] == 5
+    if repository_name == "spring-kafka":
+        if version == "v2.8.0":
+            assert class_npa_dict[NPA_SPRING_KAFKA_CLASS] == 1
+        if version == "v2.8.1":
+            assert class_npm_dict[NPM_SPRING_KAFKA_CLASS] == 2
+        if version == "v2.8.2":
+            assert class_wmc_dict[WMC_SPRING_KAFKA_CLASS] == 13
+    if repository_name == "mockito":
+        if version == "v4.1.0":
+            assert class_npa_dict[NPA_MOCKITO_CLASS] == 2
+        if version == "v4.2.0":
+            assert class_npm_dict[NPM_MOCKITO_CLASS] == 52
+        if version == "v4.3.0":
+            assert class_wmc_dict[WMC_MOCKITO_CLASS] == 15
 
 def read_measures(repository_name, version, csv_writers, max_data, avg_data, files, abc, wmc, npm, npa, coa, cda, classes):
 
@@ -164,7 +209,7 @@ def read_measures(repository_name, version, csv_writers, max_data, avg_data, fil
     assert sum(npa_tot_att) >= sum(npa_tot)
 
     # top abc files
-    file_abc_sorted = sorted(file_abc_dict.items(), key=lambda x: x[1], reverse=True)[:TOP_FILES_NUMBER]
+    file_abc_sorted = sorted(file_abc_dict.items(), key=lambda x: (-x[1], str(os.path.basename(x[0]))), reverse=False)[:TOP_FILES_NUMBER]
     for t in file_abc_sorted:
         csv_writers[0].writerow([repository_name, version, t[0], os.path.basename(t[0]), round(t[1], 2)])
     
@@ -185,10 +230,13 @@ def read_measures(repository_name, version, csv_writers, max_data, avg_data, fil
         if class_wmc[i] > THRESHOLD_WMC:
             high_wmc_values.append(class_wmc[i])
 
+    # test class metrics computation
+    test_classes(repository_name, version, class_npa_dict, class_npm_dict, class_wmc_dict)
+
     # top wmc, npm and npa classes
-    class_wmc_sorted = sorted(class_wmc_dict.items(), key=lambda x: x[1], reverse=True)[:TOP_CLASSES_NUMBER]
-    class_npm_sorted = sorted(class_npm_dict.items(), key=lambda x: x[1], reverse=True)[:TOP_CLASSES_NUMBER]
-    class_npa_sorted = sorted(class_npa_dict.items(), key=lambda x: x[1], reverse=True)[:TOP_CLASSES_NUMBER]
+    class_wmc_sorted = sorted(class_wmc_dict.items(), key=lambda x: (-x[1], str(os.path.basename(x[0]))), reverse=False)[:TOP_CLASSES_NUMBER]
+    class_npm_sorted = sorted(class_npm_dict.items(), key=lambda x: (-x[1], str(os.path.basename(x[0]))), reverse=False)[:TOP_CLASSES_NUMBER]
+    class_npa_sorted = sorted(class_npa_dict.items(), key=lambda x: (-x[1], str(os.path.basename(x[0]))), reverse=False)[:TOP_CLASSES_NUMBER]
     assert len(file_abc_sorted) == len(class_wmc_sorted) == len(class_npm_sorted) == len(class_npa_sorted) == TOP_CLASSES_NUMBER
     for i in range(TOP_CLASSES_NUMBER):
         csv_writers[1].writerow([repository_name, version, os.path.dirname(class_wmc_sorted[i][0]), os.path.basename(class_wmc_sorted[i][0]), int(class_wmc_sorted[i][1])])
