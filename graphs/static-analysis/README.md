@@ -6,7 +6,7 @@
 | [mockito](https://github.com/mockito/mockito) | Very Large | 4.7.0 | 949 | [Maven Central](https://mvnrepository.com/artifact/org.mockito/mockito-core) |
 | [spring-kafka](https://github.com/spring-projects/spring-kafka) | Large | 2.9.0 | 502 | [Maven Central](https://mvnrepository.com/artifact/org.springframework.kafka/spring-kafka) |
 | [Java-WebSocket](https://github.com/TooTallNate/Java-WebSocket) | Medium | 1.5.3 | 175 | [Maven Central](https://mvnrepository.com/artifact/org.java-websocket/Java-WebSocket) |
-| [FastCSV](https://github.com/osiegmar/FastCSV) | Small |2.2.0 | 39 | [Maven Central](https://mvnrepository.com/artifact/de.siegmar/fastcsv) |
+| [FastCSV](https://github.com/osiegmar/FastCSV) | Small | 2.2.0 | 39 | [Maven Central](https://mvnrepository.com/artifact/de.siegmar/fastcsv) |
 
 ## Graphs
 - [Cumulative measures](#cumulative-measures)

@@ -181,8 +181,11 @@ def plot_visibility_percentages(repositories, values, title, file):
     for i in range(0, len(repositories)):
         bar1 = plt.bar(x[i], y1[i], 0.5, color="#1f77b4", label = "Non-Public " + name)
         bar2 = plt.bar(x[i], y2[i], 0.5, color="#d62728", label = "Public " + name)
-        plt.text(i, (100 - y2[i][0]) / 2 + y2[i][0], "{:.2f}".format(100 - y2[i][0]) + "%", color="snow", va="center_baseline", ha="center", fontweight="bold")
         #plt.bar_label(bar1, padding=5, fontweight="bold", fmt="%.0f%%")
+        if values[i][0] == 0:
+            plt.text(i, (100 - y2[i][0]) / 2 + y2[i][0], str(int(100.0)) + "%", color="snow", va="center_baseline", ha="center", fontweight="bold")
+        else:
+            plt.text(i, (100 - y2[i][0]) / 2 + y2[i][0], "{:.2f}".format(100 - y2[i][0]) + "%", color="snow", va="center_baseline", ha="center", fontweight="bold")
         if values[i][0] != 0:
             plt.text(i, y2[i][0] / 2, "{:.2f}".format(y2[i][0]) + "%", color="snow", va="center_baseline", ha="center", fontweight="bold")
             #plt.bar_label(bar2, label_type="center", color="snow", fontweight="bold", fmt="%.2f%%")
