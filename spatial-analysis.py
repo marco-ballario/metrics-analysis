@@ -41,7 +41,7 @@ def read_measures(repository_name, version, abc, npm, npa, wmc, size, compl, met
     att.append([sum(npa_tot), sum(npa_tot_att)])
     return
 
-def plot_cumulative_measures(repositories, values, legend_loc, title, file):
+def plot_cumulative_measures(repositories, values, legend_loc, title, file, abc = False):
     x = []
     y = []
     for i in range(0, len(repositories)):
@@ -52,13 +52,16 @@ def plot_cumulative_measures(repositories, values, legend_loc, title, file):
     #figure(figsize=(50, 26), dpi=80)
     plt.rcParams.update({"font.size": font_size})
     figure, axis = plt.subplots(3, 1)
-    figure.set_size_inches(20, 28) #20-28
+    figure.set_size_inches(23, 28) #20-28
     titles = ["Sum", "Maximum", "Average"]
 
     for j in range(3):
         for i in range(0,len(repositories)):
-            bar=axis[j].barh(y[i][2-j], x[i][2-j], 0.5, label=repositories[i])
-            axis[j].bar_label(bar, padding=5, fontweight="bold")
+            bar = axis[j].barh(y[i][2-j], x[i][2-j], 0.5, label=repositories[i])
+            if abc == True or j == 2:
+                axis[j].bar_label(bar, padding=5, fmt="%0.2f", fontweight="bold")
+            else:
+                axis[j].bar_label(bar, padding=5, fontweight="bold")
         axis[j].margins(x=0.2)
         axis[j].set_xlabel("Metric Values", loc="left", labelpad = 10, fontweight="bold", fontsize=font_size)
         axis[j].set_ylabel("Repositories", loc="bottom", labelpad = 10, fontweight="bold", fontsize=font_size)
@@ -77,16 +80,16 @@ def plot_size_measures(repositories, val, title, file):
     x = []
     y = []
     for i in range(0, len(repositories)):
-        x.append([val[i][3], val[i][2], val[i][1], val[i][0]])
+        x.append([val[i][3], val[i][2], float(round(val[i][1], 2)), float(round(val[i][0], 2))])
         y.append([repositories[i] + "_cyc", repositories[i] + "_ploc", repositories[i] + "_hal", repositories[i] + "_abc"])
 
     font_size = 30
     plt.rcParams.update({"font.size": font_size})
-    figure(figsize=(27, 18), dpi=80)
+    figure(figsize=(33, 18), dpi=80)
 
     for i in range(0,len(repositories)):
         bar = plt.barh(y[i], x[i], 0.66, label=repositories[i])
-        plt.bar_label(bar, padding=5, fontweight="bold")
+        plt.bar_label(bar, padding=5, fmt="%0.2f", fontweight="bold")
 
     plt.margins(x=0.13)
     #plt.xticks(rotation=45)
@@ -169,7 +172,7 @@ def plot_visibility_percentages(repositories, values, title, file):
     y2 = []
     for i in range(0, len(repositories)):
         y1.append([100])
-        y2.append([values[i][0] / values[i][1] * 100])
+        y2.append([round(values[i][0] / values[i][1] * 100, 2)])
         x.append([repositories[i]])
 
     font_size = 30
@@ -221,7 +224,7 @@ def spatial_analysis():
     for i in range(len(repos)):
         read_measures(repos[i], versions[i], abc, npm, npa, wmc, size, compl, met, att)
 
-    plot_cumulative_measures(repos, abc, "lower right", "ABC - Magnitude", "cumulative-measures-abc.svg")
+    plot_cumulative_measures(repos, abc, "lower right", "ABC - Magnitude", "cumulative-measures-abc.svg", True)
     plot_cumulative_measures(repos, wmc, "lower right", "WMC - Weighted Methods per Class", "cumulative-measures-wmc.svg")
     plot_cumulative_measures(repos, npm, "lower right", "NPM - Number of Public Methods", "cumulative-measures-npm.svg")
     plot_cumulative_measures(repos, npa, "lower right", "NPA - Number of Public Attributes", "cumulative-measures-npa.svg")

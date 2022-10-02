@@ -130,7 +130,7 @@ def test_classes(repository_name, version, class_npa_dict, class_npm_dict, class
         if version == "v4.3.0":
             assert class_wmc_dict[WMC_MOCKITO_CLASS] == 15
 
-def read_measures(repository_name, version, csv_writers, max_data, avg_data, files, abc, wmc, npm, npa, coa, cda, classes):
+def read_measures(repository_name, version, top_data, max_data, avg_data, files, abc, wmc, npm, npa, coa, cda, classes):
 
     abc_mag = []
     loc_ploc = []
@@ -211,7 +211,7 @@ def read_measures(repository_name, version, csv_writers, max_data, avg_data, fil
     # top abc files
     file_abc_sorted = sorted(file_abc_dict.items(), key=lambda x: (-x[1], str(os.path.basename(x[0]))), reverse=False)[:TOP_FILES_NUMBER]
     for t in file_abc_sorted:
-        csv_writers[0].writerow([repository_name, version, t[0], os.path.basename(t[0]), round(t[1], 2)])
+        top_data[0].append([repository_name, version, t[0], os.path.basename(t[0]), round(t[1], 2)])
     
     # thresholds wmc, npm and npa
     for i, v in enumerate(class_names):
@@ -239,9 +239,9 @@ def read_measures(repository_name, version, csv_writers, max_data, avg_data, fil
     class_npa_sorted = sorted(class_npa_dict.items(), key=lambda x: (-x[1], str(os.path.basename(x[0]))), reverse=False)[:TOP_CLASSES_NUMBER]
     assert len(file_abc_sorted) == len(class_wmc_sorted) == len(class_npm_sorted) == len(class_npa_sorted) == TOP_CLASSES_NUMBER
     for i in range(TOP_CLASSES_NUMBER):
-        csv_writers[1].writerow([repository_name, version, os.path.dirname(class_wmc_sorted[i][0]), os.path.basename(class_wmc_sorted[i][0]), int(class_wmc_sorted[i][1])])
-        csv_writers[2].writerow([repository_name, version, os.path.dirname(class_npm_sorted[i][0]), os.path.basename(class_npm_sorted[i][0]), int(class_npm_sorted[i][1])])
-        csv_writers[3].writerow([repository_name, version, os.path.dirname(class_npa_sorted[i][0]), os.path.basename(class_npa_sorted[i][0]), int(class_npa_sorted[i][1])])
+        top_data[1].append([repository_name, version, os.path.dirname(class_wmc_sorted[i][0]), os.path.basename(class_wmc_sorted[i][0]), int(class_wmc_sorted[i][1])])
+        top_data[2].append([repository_name, version, os.path.dirname(class_npm_sorted[i][0]), os.path.basename(class_npm_sorted[i][0]), int(class_npm_sorted[i][1])])
+        top_data[3].append([repository_name, version, os.path.dirname(class_npa_sorted[i][0]), os.path.basename(class_npa_sorted[i][0]), int(class_npa_sorted[i][1])])
 
     files.append(len(file_names))
     classes.append(len(class_names))
@@ -411,7 +411,7 @@ def plot_threshold_percentages(versions, files, values, title, file, label1, lab
         versions[i] = re.sub("[a-zA-Z-]", "", versions[i])
     for i in range(0, len(versions)):
         x1.append(100)
-        x2.append(values[i] / files[i] * 100)
+        x2.append(round(values[i] / files[i] * 100, 2))
         y.append(str(versions[i]))
 
     font_size = 28 #28
@@ -456,14 +456,9 @@ def temporal_analysis():
         ["v2.8.0", "v2.8.1", "v2.8.2", "v2.8.3", "v2.8.4", "v2.8.5", "v2.8.6", "v2.8.7", "v2.8.8", "v2.9.0"],
         ["v4.1.0", "v4.2.0", "v4.3.0", "v4.3.1", "v4.4.0", "v4.5.0", "v4.5.1", "v4.6.0", "v4.6.1", "v4.7.0"]
     ]
-    header = ["repository", "version", "path", "name", "value"]
+    header = ["repository", "version", "path", "name", "measure"]
     top_metrics = ["abc", "wmc", "npm", "npa"]
-    csv_files = []
-    csv_writers = []
-    for i, v in enumerate(top_metrics):
-        f = open("./temporal-analysis/rankings/top_" + v + "_" + ("files" if i == 0 else "classes") + ".csv", "w")
-        csv_files.append(f)
-        csv_writers.append(csv.writer(f))
+    top_data = [[],[],[],[]]
 
     for index, repo in enumerate(repos):
         avg = []
@@ -477,9 +472,9 @@ def temporal_analysis():
         files = []
         classes = []
 
-        print("Generating " + repo + " graphs and tables...")
+        print("Generating " + repo + " graphs...")
         for version in versions[index]:
-            read_measures(repo, version, csv_writers, max, avg, files, abc, wmc, npm, npa, coa, cda, classes)
+            read_measures(repo, version, top_data, max, avg, files, abc, wmc, npm, npa, coa, cda, classes)
             print(repo + " " + version + " data collected!")
         opt = index == 3
         plot_threshold_percentages(versions[index], files, abc, "ABC magnitude files (Threshold = ?) - " + repo, "threshold-percentages-abc-" + repo + ".svg", "Files", "Magnitude >= ", "Magnitude < ", THRESHOLD_ABC)
@@ -496,9 +491,14 @@ def temporal_analysis():
         plot_threshold_measures(versions[index], classes, cda, "CDA classes (Threshold = ?) - " + repo, "threshold-measures-cda-" + repo + ".svg", "Classes", "CDA = ", "CDA < ", THRESHOLD_CDA, opt)
         print_plot(versions[index], avg,"./temporal-analysis/cumulative/average-measures-" + repo)
         print_plot(versions[index], max,"./temporal-analysis/cumulative/maximum-measures-" + repo)
-        print(repo + " graphs and tables generated!")
-        
+        print(repo + " graphs generated!")
+    
+    print("Generating ranking tables...")
     for i, v in enumerate(top_metrics):
-        csv_files[i].close()
+        f = open("./temporal-analysis/rankings/top_" + v + "_" + ("files" if i == 0 else "classes") + ".csv", "w")
+        csv.writer(f).writerow(header)
+        csv.writer(f).writerows(top_data[i])
+        f.close()
+    print("Ranking tables generated!")
 
 temporal_analysis()
