@@ -63,15 +63,15 @@ def plot_cumulative_measures(repositories, values, legend_loc, title, file, abc 
             else:
                 axis[j].bar_label(bar, padding=5, fontweight="bold")
         axis[j].margins(x=0.2)
-        axis[j].set_xlabel("Metric Values", loc="left", labelpad = 10, fontweight="bold", fontsize=font_size)
-        axis[j].set_ylabel("Repositories", loc="bottom", labelpad = 10, fontweight="bold", fontsize=font_size)
+        axis[j].set_xlabel("Metric Values", loc="center", labelpad = 10, fontweight="bold", fontsize=font_size)
+        axis[j].set_ylabel("Repositories", loc="center", labelpad = 10, fontweight="bold", fontsize=font_size)
         axis[j].set_title(title + " - " + titles[j])
         # remove legend?
         #axis[j].legend(loc=legend_loc)
         axis[j].set_ylim([-0.75, 3.75])
 
     #plt.xticks(rotation=45)
-    plt.tight_layout(h_pad=2)
+    plt.tight_layout(h_pad=5)
     plt.savefig("./spatial-analysis/" + file)
     plt.cla()
     return
@@ -93,8 +93,8 @@ def plot_size_measures(repositories, val, title, file):
 
     plt.margins(x=0.13)
     #plt.xticks(rotation=45)
-    plt.xlabel("Metric Values", loc="left",labelpad = 10, fontweight="bold", fontsize=font_size)
-    plt.ylabel("Repositories", loc="bottom", labelpad = 10, fontweight="bold", fontsize=font_size)
+    plt.xlabel("Metric Values", loc="center",labelpad = 10, fontweight="bold", fontsize=font_size)
+    plt.ylabel("Repositories", loc="center", labelpad = 10, fontweight="bold", fontsize=font_size)
     plt.title(title)
     plt.legend(loc="lower right",)
     plt.tight_layout()
@@ -119,8 +119,8 @@ def plot_complexity_measures(repositories, val, title, file):
 
     plt.margins(x=0.13)
     #plt.xticks(rotation=45)
-    plt.xlabel("Metric Values", loc="left", labelpad = 10, fontweight="bold", fontsize=font_size)
-    plt.ylabel("Repositories", loc="bottom", labelpad = 10, fontweight="bold", fontsize=font_size)
+    plt.xlabel("Metric Values", loc="center", labelpad = 10, fontweight="bold", fontsize=font_size)
+    plt.ylabel("Repositories", loc="center", labelpad = 10, fontweight="bold", fontsize=font_size)
     plt.title(title)
     ax = plt.gca()
     ax.set_ylim([-1, 8])
@@ -155,8 +155,8 @@ def plot_visibility_measures(repositories, values, title, file):
 
     plt.margins(x=0.15)
     #plt.xticks(rotation=45)
-    plt.xlabel("Metric Values", loc="left", labelpad = 10, fontweight="bold", fontsize=font_size)
-    plt.ylabel("Repositories", loc="bottom", labelpad = 10, fontweight="bold", fontsize=font_size)
+    plt.xlabel("Metric Values", loc="center", labelpad = 10, fontweight="bold", fontsize=font_size)
+    plt.ylabel("Repositories", loc="center", labelpad = 10, fontweight="bold", fontsize=font_size)
     plt.title(title)
     handles, labels = plt.gca().get_legend_handles_labels()
     order = [1, 0]
@@ -195,8 +195,8 @@ def plot_visibility_percentages(repositories, values, title, file):
 
     plt.margins(x=0.15)
     #plt.xticks(rotation=45)
-    plt.xlabel("Percentage Values", loc="left", labelpad = 10, fontweight="bold", fontsize=font_size)
-    plt.ylabel("Repositories", loc="bottom", labelpad = 10, fontweight="bold", fontsize=font_size)
+    plt.xlabel("Percentage Values", loc="center", labelpad = 10, fontweight="bold", fontsize=font_size)
+    plt.ylabel("Repositories", loc="center", labelpad = 10, fontweight="bold", fontsize=font_size)
     plt.title(title)
     ax = plt.gca()
     ax.set_ylim([0, 120])

@@ -211,7 +211,7 @@ def read_measures(repository_name, version, top_data, max_data, avg_data, files,
     # top abc files
     file_abc_sorted = sorted(file_abc_dict.items(), key=lambda x: (-x[1], str(os.path.basename(x[0]))), reverse=False)[:TOP_FILES_NUMBER]
     for t in file_abc_sorted:
-        top_data[0].append([repository_name, version, t[0], os.path.basename(t[0]), round(t[1], 2)])
+        top_data[0].append([repository_name, version, t[0], os.path.basename(t[0]), "{:.2f}".format(round(t[1], 2))])
     
     # thresholds wmc, npm and npa
     for i, v in enumerate(class_names):
@@ -256,7 +256,7 @@ def read_measures(repository_name, version, top_data, max_data, avg_data, files,
     avg_data.append( [sum(abc_mag)/len(abc_mag), sum(loc_ploc)/len(loc_ploc), sum(wmc_tot)/len(wmc_tot), sum(cyc_sum)/len(cyc_sum), sum(npm_tot)/len(npm_tot), sum(npa_tot)/len(npa_tot), sum(npn_tot_met)/len(npn_tot_met), sum(npa_tot_att)/len(npa_tot_att), sum(npm_avg)/len(npm_avg), sum(npa_avg)/len(npa_avg)] )
     return
 
-def print_plot(versions,vec,img_path):
+def print_plot(versions, vec, img_path, repo, measure):
     abc=[]
     wmc=[]
     npm=[]
@@ -287,26 +287,30 @@ def print_plot(versions,vec,img_path):
 
     axis[0, 0].plot(versions, abc)
     axis[0, 0].scatter(versions, abc, color="r")
-    axis[0, 0].set_title("ABC")
-    axis[0, 0].set_xlabel('versions')
+    axis[0, 0].set_title("ABC - " + measure + " - " + repo)
+    axis[0, 0].set_xlabel('Versions')
+    axis[0, 0].set_ylabel(measure)
 
     axis[0, 1].plot(versions, loc)
     axis[0, 1].scatter(versions, loc, color="r")
-    axis[0, 1].set_title("PLOC")
-    axis[0, 1].set_xlabel('versions')
+    axis[0, 1].set_title("PLOC - " + measure + " - " + repo)
+    axis[0, 1].set_xlabel('Versions')
+    axis[0, 1].set_ylabel(measure)
 
     axis[1, 0].plot(versions, wmc)
     axis[1, 0].scatter(versions, wmc, color="r")
-    axis[1, 0].set_title("WMC")
-    axis[1, 0].set_xlabel('versions')
+    axis[1, 0].set_title("WMC - " + measure + " - " + repo)
+    axis[1, 0].set_xlabel('Versions')
+    axis[1, 0].set_ylabel(measure)
 
     axis[1, 1].plot(versions, cyc)
     axis[1, 1].scatter(versions, cyc, color="r")
-    axis[1, 1].set_title("CC")
-    axis[1, 1].set_xlabel('versions')
+    axis[1, 1].set_title("CC - " + measure + " - " + repo)
+    axis[1, 1].set_xlabel('Versions')
+    axis[1, 1].set_ylabel(measure)
 
     plt.subplots_adjust(wspace=0.2, hspace=0.3)
-    plt.tight_layout()
+    plt.tight_layout(h_pad=2, w_pad=2)
     plt.savefig(img_path + "-1.svg")
     plt.cla()
     plt.close(figure)
@@ -318,36 +322,42 @@ def print_plot(versions,vec,img_path):
 
     axis[0, 0].plot(versions, npm)
     axis[0, 0].scatter(versions, npm, color="r")
-    axis[0, 0].set_title("NPM")
-    axis[0, 0].set_xlabel('versions')
+    axis[0, 0].set_title("NPM - " + measure + " - " + repo)
+    axis[0, 0].set_xlabel('Versions')
+    axis[0, 0].set_ylabel(measure)
 
     axis[0, 1].plot(versions, npa)
     axis[0, 1].scatter(versions, npa, color="r")
-    axis[0, 1].set_title("NPA")
-    axis[0, 1].set_xlabel('versions')
+    axis[0, 1].set_title("NPA - " + measure + " - " + repo)
+    axis[0, 1].set_xlabel('Versions')
+    axis[0, 1].set_ylabel(measure)
 
     axis[1, 0].plot(versions, nm)
     axis[1, 0].scatter(versions, nm, color="r")
-    axis[1, 0].set_title("NM")
-    axis[1, 0].set_xlabel('versions')
+    axis[1, 0].set_title("NM - " + measure + " - " + repo)
+    axis[1, 0].set_xlabel('Versions')
+    axis[1, 0].set_ylabel(measure)
 
     axis[1, 1].plot(versions, na)
     axis[1, 1].scatter(versions, na, color="r")
-    axis[1, 1].set_title("NA")
-    axis[1, 1].set_xlabel('versions')
+    axis[1, 1].set_title("NA - " + measure + " - " + repo)
+    axis[1, 1].set_xlabel('Versions')
+    axis[1, 1].set_ylabel(measure)
 
     axis[2, 0].plot(versions, coa)
     axis[2, 0].scatter(versions, coa, color="r")
-    axis[2, 0].set_title("COA")
-    axis[2, 0].set_xlabel('versions')
+    axis[2, 0].set_title("COA - " + measure + " - " + repo)
+    axis[2, 0].set_xlabel('Versions')
+    axis[2, 0].set_ylabel(measure)
 
     axis[2, 1].plot(versions, cda)
     axis[2, 1].scatter(versions, cda, color="r")
-    axis[2, 1].set_title("CDA")
-    axis[2, 1].set_xlabel('versions')
+    axis[2, 1].set_title("CDA - " + measure + " - " + repo)
+    axis[2, 1].set_xlabel('Versions')
+    axis[2, 1].set_ylabel(measure)
 
     plt.subplots_adjust(wspace=0.2, hspace=0.3)
-    plt.tight_layout()
+    plt.tight_layout(h_pad=2, w_pad=2)
     plt.savefig(img_path + "-2.svg")
     plt.cla()
     plt.close(figure)
@@ -391,8 +401,8 @@ def plot_threshold_measures(versions, files, values, title, file, label1, label2
         
     ###print(plt.yticks()[0].tolist()) 
     plt.yticks(yt)
-    plt.xlabel("Versions", loc="left", labelpad = 10, fontweight="bold", fontsize=font_size)
-    plt.ylabel("Number Of " + label1, loc="bottom", labelpad = 10, fontweight="bold", fontsize=font_size)
+    plt.xlabel("Versions", loc="center", labelpad = 10, fontweight="bold", fontsize=font_size)
+    plt.ylabel("Number Of " + label1, loc="center", labelpad = 10, fontweight="bold", fontsize=font_size)
     plt.title(title.replace("?", str(threshold)))
     handles, labels = plt.gca().get_legend_handles_labels()
     order = [1, 0]
@@ -436,8 +446,8 @@ def plot_threshold_percentages(versions, files, values, title, file, label1, lab
     #plt.xticks(rotation=45)
     yt=plt.yticks()[0].tolist()
     plt.yticks(yt)
-    plt.xlabel("Versions", loc="left", labelpad = 10, fontweight="bold", fontsize=font_size)
-    plt.ylabel("Percentage Of " + label1, loc="bottom", labelpad = 10, fontweight="bold", fontsize=font_size)
+    plt.xlabel("Versions", loc="center", labelpad = 10, fontweight="bold", fontsize=font_size)
+    plt.ylabel("Percentage Of " + label1, loc="center", labelpad = 10, fontweight="bold", fontsize=font_size)
     plt.title(title.replace("?", str(threshold)))
     handles, labels = plt.gca().get_legend_handles_labels()
     order = [1, 0]
@@ -489,8 +499,8 @@ def temporal_analysis():
         plot_threshold_measures(versions[index], classes, coa, "COA classes (Threshold = ?) - " + repo, "threshold-measures-coa-" + repo + ".svg", "Classes", "COA = ", "COA < ", THRESHOLD_COA, opt)
         plot_threshold_percentages(versions[index], classes, cda, "CDA classes (Threshold = ?) - " + repo, "threshold-percentages-cda-" + repo + ".svg", "Classes", "CDA = ", "CDA < ", THRESHOLD_CDA)
         plot_threshold_measures(versions[index], classes, cda, "CDA classes (Threshold = ?) - " + repo, "threshold-measures-cda-" + repo + ".svg", "Classes", "CDA = ", "CDA < ", THRESHOLD_CDA, opt)
-        print_plot(versions[index], avg,"./temporal-analysis/cumulative/average-measures-" + repo)
-        print_plot(versions[index], max,"./temporal-analysis/cumulative/maximum-measures-" + repo)
+        print_plot(versions[index], avg,"./temporal-analysis/cumulative/average-measures-" + repo, repo, "Average")
+        print_plot(versions[index], max,"./temporal-analysis/cumulative/maximum-measures-" + repo, repo, "Maximum")
         print(repo + " graphs generated!")
     
     print("Generating ranking tables...")
